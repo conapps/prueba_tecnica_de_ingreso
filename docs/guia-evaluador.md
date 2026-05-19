@@ -1,4 +1,4 @@
-# Guía del evaluador — Prueba técnica DevOps Jr.
+# Guía del evaluador — Prueba técnica DevOps
 
 Documento interno. La consigna para el candidato está en [consigna-participante.md](consigna-participante.md).
 

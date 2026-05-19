@@ -1,4 +1,4 @@
-# Prueba técnica — DevOps Jr. (IA / Infraestructura)
+# Prueba técnica de ingreso — DevOps (IA / Infraestructura)
 
 **Objetivo:** Desarrollar una solución que consulte la **API de Zabbix**, muestre el estado operativo de un entorno de red monitoreado y, ante una falla simulada, permita **diagnosticar** y **remediar** el problema usando **Ansible**.
 

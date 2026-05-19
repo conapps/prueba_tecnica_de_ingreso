@@ -1,4 +1,4 @@
-# Prueba técnica de ingreso — DevOps Jr. (IA / Infraestructura)
+# Prueba técnica de ingreso — DevOps (IA / Infraestructura)
 
 Material para la **prueba técnica de ingreso** del área de trabajo, con foco en monitoreo (Zabbix), automatización (Ansible), troubleshooting y uso responsable de herramientas de IA.
 
