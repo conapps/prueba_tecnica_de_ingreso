@@ -3,24 +3,24 @@
 **Objetivo:** Desarrollar una solución que consulte la **API de Zabbix**, muestre el estado operativo de un entorno de red monitoreado y, ante una falla simulada, permita **diagnosticar** y **remediar** el problema usando **Ansible**.
 
 > **💡 Sobre el uso de IA**  
-> Podés usar herramientas de IA (ChatGPT, Claude, Cursor, Copilot, Gemini, Antigravity u otras). Nos interesa ver **cómo las usás**, **cómo validás** lo que te proponen y **cómo comunicás** avances y bloqueos. No se evalúa memorizar endpoints ni comandos Cisco de memoria.
+> Podés usar **tus propias** herramientas de IA (ChatGPT, Claude, Cursor, Copilot, Gemini, Antigravity u otras), de lo contrario te proporcionaremos una. Nos interesa ver **cómo las usás**, **cómo validás** lo que te proponen y **cómo comunicás** avances y bloqueos. No se evalúa memorizar endpoints ni comandos Cisco de memoria.
 
 ---
 
 ## Contexto
 
-Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por:
+Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts** con nombres fijos:
 
-| Equipo | Tipo | Notas |
-| --- | --- | --- |
-| **Router** | Cisco IOS (real) | Monitoreado por SNMP; interfaces descubiertas |
-| **Switch** | Cisco IOS (real) | Monitoreado por SNMP; interfaces descubiertas |
-| **Equipo ficticio** | Simulado | Tiene al menos una **alerta SNMP activa** de referencia |
+| Host name en Zabbix | Rol | Tipo |
+| --- | --- | --- | --- |
+| **`RTR-Prod-Gateway1`** | Router | Cisco IOS |
+| **`SW-Prod-Core1`** | Switch core | Cisco IOS |
+| **`SW-Prod-Edge1`** | Switch edge | Cisco IOS |
 
-Tu tarea es construir una **página web simple** que consuma la API de Zabbix con el **token** que te entregamos y muestre información operativa de **esos 3 equipos únicamente**.
+> **💡 Nombre visible**  
+> En la página mostrá el **nombre del host en Zabbix**. Los tres equipos de la prueba son exactamente los de la tabla anterior.
 
-> **⚠️ Importante**  
-> Tu usuario de Zabbix solo puede ver los hosts de la prueba. La página **no debe** mostrar información de otros equipos del ambiente.
+Tu tarea es construir una **página web simple** que consuma la API de Zabbix con el **token** que te entregamos y muestre información operativa de **`RTR-Prod-Gateway1`**, **`SW-Prod-Core1`** y **`SW-Prod-Edge1`** únicamente.
 
 ---
 
@@ -28,39 +28,35 @@ Tu tarea es construir una **página web simple** que consuma la API de Zabbix co
 
 Al comenzar la prueba recibirás credenciales y datos de acceso. Guardalos de forma segura y **no los compartas** ni los subas a repositorios públicos.
 
-### Servidor Linux (donde corrés la solución)
+### Servidor Linux
 
 | Dato | Descripción |
 | --- | --- |
 | IP o DNS | Dirección para conectarte por SSH |
-| Usuario / clave o contraseña | Acceso al servidor de la prueba |
-| Puerto SSH | Si no es el estándar (22) |
+| Usuario | Acceso al servidor de la prueba |
+| Clave | Acceso al servidor de la prueba |
+| Puerto SSH | Puesto por defecto (22) |
 
-En el servidor tenés disponibles, entre otras cosas: **Docker**, **Ansible** y conectividad hacia Zabbix y los equipos Cisco.
+> Datos del servidor Linux:
+> - En el servidor tenés disponibles, entre otras cosas: **Docker**, **Ansible** y conectividad hacia Zabbix y los equipos Cisco.
+> - **Ansible** — automatización con permisos de cambio
+> - **Inventario** — ya configurado (hosts, grupos y credenciales de acceso) para que **Ansible** se conecte a los equipos Cisco reales con permisos para **remediar**. No tenés que armar el inventario desde cero en la prueba: usalo tal como viene y concentrate el esfuerzo en los **playbooks**. Esos permisos de cambio se usan **solo desde Ansible**, no desde una sesión SSH manual.
 
-### Zabbix (solo lectura sobre los hosts de la prueba)
+### Zabbix
 
-| Dato | Descripción |
-| --- | --- |
-| URL | Frontend / endpoint API (`…/api_jsonrpc.php`) |
-| Usuario | Usuario exclusivo de la prueba |
-| API token | Autenticación para consultas (`host.get`, `problem.get`, etc.) |
+| URL | Usuario | Contraseña | API Token |
+| --- | --- | --- | --- |
+| `https://alertasX.conatel-lab.conatel.cloud` | `demo` | `Zabbix123!` | Te lo entregamos al iniciar |
 
-> **💡 Tip**  
-> Antes de armar la web, podés validar el token con una consulta simple (`curl`, script en Python, etc.). El método `apiinfo.version` no requiere autenticación; para hosts y problemas sí necesitás el token en el campo `auth`.
+### Equipos Cisco
 
-### Equipos Cisco — SSH de **solo lectura** (diagnóstico)
+| Host Zabbix | IP | Usuario SSH | Contraseña SSH | SNMPv2 |
+| --- | --- | --- | --- |
+| `RTR-Prod-Gateway1` | `10.0.10.10` | `demo` | `Demo123!` | `snmp-demo` |
+| `SW-Prod-Core1` | `10.0.10.11` | `demo` | `Demo123!` | `snmp-demo` |
+| `SW-Prod-Edge1` | `10.0.10.12` | `demo` | `Demo123!` | `snmp-demo` |
 
-| Dato | Router | Switch |
-| --- | --- | --- |
-| IP | *(te la indicamos)* | *(te la indicamos)* |
-| Usuario / contraseña | Solo lectura | Solo lectura |
-
-**Regla:** este acceso es **únicamente para diagnóstico** (`show …`, revisar interfaces, rutas, etc.). **No** debés aplicar cambios manuales por SSH en los equipos.
-
-### Ansible — automatización con permisos de cambio
-
-Te entregamos inventario y/o variables para que **Ansible** se conecte a los equipos Cisco con permisos para **remediar** (por ejemplo, levantar una interfaz). Esos permisos se usan **solo desde Ansible**, no desde una sesión SSH manual.
+**Regla:** El acceso SSH es **únicamente para diagnóstico**. **No** debés aplicar cambios manuales por SSH en los equipos.
 
 ---
 
@@ -70,11 +66,11 @@ Te entregamos inventario y/o variables para que **Ansible** se conecte a los equ
 - Debe ser **accesible por navegador** (indicá URL y puerto al finalizar cada parte).
 - **No** hace falta autenticación en la página web ni diseño visual avanzado.
 - **No** hardcodees credenciales en el código: usá variables de entorno o archivos de config fuera del repositorio.
-- Consultá Zabbix **solo vía API** con el token entregado (no hace falta modificar Zabbix).
-- Filtrá o mostrá **únicamente** los 3 hosts de la prueba.
+- Consultá Zabbix **solo vía API** con el **token** entregado (no hace falta entrar ni modificar Zabbix por la interfaz web).
+- La solución debe mostrar: `RTR-Prod-Gateway1`, `SW-Prod-Core1` y `SW-Prod-Edge1`.
 - Ante la Parte 3: **diagnóstico** por SSH lectura; **corrección** solo con **Ansible**.
 
-**Stack libre:** Python, Node.js, PHP, contenedor con Nginx/Caddy, etc. Elegí lo que te resulte más cómodo.
+**Stack libre:** elegí la tecnología que te resulte más cómoda.
 
 ---
 
@@ -88,7 +84,7 @@ La página debe mostrar, como mínimo:
 
 | Campo | Descripción |
 | --- | --- |
-| **Nombre del equipo** | Nombre visible en Zabbix |
+| **Nombre del equipo** | Nombre del host en Zabbix |
 | **Estado / disponibilidad** | Disponible, No disponible o Desconocido (o equivalente claro) |
 | **Indicador visual** | Algo simple: color, badge o texto que distinga los estados |
 
@@ -96,9 +92,9 @@ La página debe mostrar, como mínimo:
 
 | Equipo | Estado |
 | --- | --- |
-| Router CML | Disponible |
-| Switch CML | Disponible |
-| Equipo ficticio | No disponible |
+| RTR-Prod-Gateway1 | Disponible |
+| SW-Prod-Core1 | Disponible |
+| SW-Prod-Edge1 | No disponible |
 
 ### Condiciones
 
@@ -122,9 +118,9 @@ La página debe mostrar, como mínimo:
 
 | Equipo | Estado | Problemas activos |
 | --- | --- | --- |
-| Router CML | Disponible | 0 |
-| Switch CML | Disponible | 0 |
-| Equipo ficticio | No disponible | 1 |
+| RTR-Prod-Gateway1 | Disponible | 0 |
+| SW-Prod-Core1 | Disponible | 0 |
+| SW-Prod-Edge1 | No disponible | 1 |
 
 **2. Detalle de alertas** — Nueva sección o tabla con los problemas activos. Como mínimo:
 
@@ -140,23 +136,18 @@ La página debe mostrar, como mínimo:
 
 | Equipo | Alerta | Severidad | Desde |
 | --- | --- | --- | --- |
-| Equipo ficticio | SNMP unavailable | High | 10:32 |
-| Router CML | Interface down | Average | 10:45 |
+| SW-Prod-Edge1 | SNMP unavailable | High | 10:32 |
+| RTR-Prod-Gateway1 | Interface down | Average | 10:45 |
 
 ### Condiciones
 
-- Seguir usando la **API de Zabbix** (p. ej. `problem.get`, `event.get` o métodos equivalentes según versión).
+- Seguir usando la **API de Zabbix**.
 - Mostrar **solo** problemas de los 3 hosts de la prueba.
 - Actualización manual o automática: a tu criterio.
 
-### Referencia API (orientativa)
-
-> **📚 Documentación:** [Zabbix API Reference](https://www.zabbix.com/documentation/current/es/manual/api/reference)  
-> Métodos útiles: `host.get`, `problem.get`, `trigger.get` (con filtros por host).
-
 ### Al finalizar la Parte 2
 
-> **Avisanos cuando termines.** Después vamos a **simular una falla** en el entorno para validar que tu página la detecta.
+> **Avisanos cuando termines.** Vamos a **simular una falla** en el entorno para validar que tu página la detecta.
 
 ---
 
@@ -166,37 +157,48 @@ La página debe mostrar, como mínimo:
 
 > **⚠️ No sabés de antemano qué falla vamos a generar.** Solo sabés que habrá un incidente operativo que deberás investigar.
 
-### Qué haremos nosotros
-
-El evaluador generará una **falla controlada** (por ejemplo: interfaz apagada, ruta eliminada o corte entre router y switch). La falla tiene **procedimiento de rollback** por nuestro lado.
+El evaluador generará una **falla controlada** la cual podrás ver en tu solución (si la Parte 2 fue exitosa).
 
 ### Qué esperamos que hagas vos
 
-1. **Detectar** el problema en tu página y/o en Zabbix (API o frontend, si te sirve para contrastar).
+1. **Detectar** el problema en tu solución.
 2. **Identificar** el equipo afectado y la alerta relevante.
-3. **Conectarte por SSH** al router o switch con el usuario de **solo lectura** y revisar estado (interfaces, rutas, vecinos, etc.).
+3. Puedes conectarte por SSH al equipo o equipos afectados (con usuario de solo lectura) y revisar el estado del equipo afectado.
 4. **Explicar** la causa probable y la solución propuesta (podés usar IA y documentación; validá antes de ejecutar).
-5. **Aplicar la corrección mediante Ansible** desde el servidor Linux (playbook o rol que te indiquemos dónde ubicar).
-6. **Confirmar** que el problema se resolvió (alerta en recuperación o desaparecida; equipo estable en tu página).
+5. **Escribir uno o varios playbooks Ansible** que corrijan el problema.
+6. **Ejecutarlos** desde el servidor Linux con el **inventario provisto**.
+7. **Validar** que el incidente quedó resuelto: alerta en recuperación o cerrada en tu solución, estado coherente en tu solución y, si aplica, contraste con diagnóstico por SSH de solo lectura.
+
+### Remediación con Ansible (detalle)
+
+| Paso | Qué esperamos |
+| --- | --- |
+| Inventario | Usar el que te entregamos (credenciales de **cambio** ya cargadas). |
+| Playbook(s) | Código tuyo: tareas idempotentes que apliquen la corrección al equipo afectado. |
+| Ejecución | Ejecutar los playbooks con Ansible y revisar salida / errores. |
+| Validación | Confirmar en tu solución que la alerta bajó; no alcanza con “haberlo corrido” sin verificar. |
+
+> **💡 Tip**  
+> Si el primer intento no alcanza, podés iterar el playbook y volver a ejecutar. Documentá qué cambiaste entre intentos.
 
 ### Reglas de la Parte 3
 
 | Permitido | No permitido |
 | --- | --- |
-| SSH **solo lectura** para diagnóstico | Cambios manuales en Cisco por SSH (`shutdown`, `no shutdown`, etc.) |
+| SSH **solo lectura** para diagnóstico | Cambios manuales en Cisco por SSH |
 | Consultar Zabbix (API / UI) | Modificar configuración de Zabbix sin necesidad |
-| Crear/ejecutar playbook Ansible de remediación | Copiar comandos sin entender su impacto |
+| Escribir, ejecutar y ajustar playbooks Ansible con el inventario provisto | Copiar playbooks o comandos sin entender su impacto |
 | Pedir confirmación antes de cambios con impacto | Exponer tokens o credenciales en logs/commits |
 
 ### Entregables de la Parte 3
 
-- **Explicación verbal o escrita breve:** qué pasó, qué revisaste, por qué esa causa, qué hizo tu playbook.
-- **Playbook Ansible** (o comando `ansible-playbook` documentado) usado para la remediación.
-- **Evidencia de recuperación:** captura o descripción de la alerta/página después del fix.
+- **Explicación verbal o escrita breve:** qué pasó, qué revisaste, por qué esa causa y qué hace cada playbook relevante.
+- **Playbook(s) Ansible** que escribiste y cómo los ejecutaste con el inventario provisto.
+- **Evidencia de recuperación:** captura o descripción de la alerta/página **después** de ejecutar el playbook y validar que el problema se resolvió.
 
 ### Al finalizar la Parte 3
 
-> Contanos el **resumen del incidente** y mostranos que la alerta **bajó o se recuperó** en Zabbix y en tu página.
+> Contanos el **resumen del incidente** y mostranos que la alerta **bajó o se recuperó** en tu solución.
 
 ---
 
@@ -207,15 +209,15 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 | Área | Qué miramos |
 | --- | --- |
 | Uso de IA | Contexto claro, validación, iteración, explicación de lo hecho |
-| Página / API | Token correcto, 3 hosts, estado y problemas, solución accesible |
+| Desarrollo de la solución | Integración con la API (token, consultas), 3 hosts, estado y problemas, solución accesible |
 | Linux / Docker / Ansible | Levantar la app, logs, playbook funcional sin cambios SSH manuales |
 | Monitoreo / troubleshooting | Interpretar alertas, cruzar con SSH, remediar y verificar |
 | Comunicación | Avisar al terminar cada parte, bloqueos y preguntas a tiempo |
 
-### No penalizamos fuerte por
+### No penalizamos por
 
 - Diseño visual básico.
-- No conocer todos los endpoints de memoria.
+- No conocer los endpoints de la API de memoria.
 - No recordar comandos Cisco exactos.
 - Elegir un stack simple pero **funcional**.
 
@@ -224,10 +226,11 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 ## Checklist rápido
 
 - [ ] Parte 1: página con estado de 3 equipos vía API.
-- [ ] Avisé cómo acceder a la página.
+- [ ] Avisar cuando termine la Parte 1.
 - [ ] Parte 2: conteo y detalle de problemas activos.
-- [ ] Avisé que terminé la Parte 2.
-- [ ] Parte 3: diagnóstico (SSH lectura) + explicación + Ansible + verificación.
+- [ ] Avisar cuando termine la Parte 2.
+- [ ] Parte 3: diagnóstico + explicación + Ansible + verificación.
+- [ ] Avisar cuando termine la Parte 3.
 
 ---
 

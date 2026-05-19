@@ -13,7 +13,7 @@ La prueba **no** busca evaluar solamente conocimientos técnicos puros, sino tam
 - Cómo interpreta un entorno técnico desconocido.
 - Cómo usa IA para avanzar, investigar, generar código o automatizaciones.
 - Cómo valida lo que la IA propone.
-- Cómo interactúa con Zabbix vía API.
+- Cómo interactúa con una herramienta vía API.
 - Cómo se conecta a equipos de red por SSH.
 - Cómo diagnostica una alerta.
 - Cómo propone o ejecuta una remediación mediante Ansible.
@@ -43,9 +43,9 @@ Deben existir **3 hosts** visibles para la prueba:
 
 | Requisito | Detalle |
 | --- | --- |
-| Equipos reales | Monitoreados; todas las interfaces descubiertas |
-| Equipo ficticio | Al menos una alerta SNMP activa (referencia para Parte 2) |
-| Independencia | Router y switch monitoreables por separado |
+| Equipos reales | monitoreados; todas las interfaces descubiertas |
+| Equipo ficticio | con al menos una alerta SNMP activa (referencia para Parte 2) |
+| Independencia | Router y switch reales monitoreables por separado |
 | Falla simulable | Posibilidad de corte o problema entre router y switch |
 | Usuario prueba | Solo ve esos 3 hosts; sin acceso al resto del ambiente |
 | API token | Lectura: hosts, problemas, triggers, eventos |
@@ -68,29 +68,56 @@ Ver checklist en [consigna-participante.md](consigna-participante.md#qué-te-ent
 
 **Plantilla de entrega** (completar al inicio):
 
-```text
-=== Servidor Linux ===
-Host: _______________
-Usuario: _______________
-Puerto SSH: _______________
-Notas: _______________
+**Servidor Linux**
 
-=== Zabbix ===
-URL: _______________
-API: _______________/api_jsonrpc.php
-Usuario: _______________
-Token: _______________
+| Campo | Valor |
+| --- | --- |
+| Host | |
+| Usuario | |
+| Puerto SSH | |
+| Notas | |
 
-=== Cisco — SSH solo lectura ===
-Router IP: _______________
-Switch IP: _______________
-Usuario: _______________
-Contraseña: _______________
+**Ansible (cambios)**
 
-=== Ansible (cambios) ===
-Inventario: _______________
-Grupo / vars: _______________
-```
+| Campo | Valor |
+| --- | --- |
+| Inventario | |
+| Grupo / vars | |
+
+**Zabbix**
+
+| Campo | Valor |
+| --- | --- |
+| URL | |
+| Usuario | |
+| Contraseña | |
+| Token | |
+
+**Equipos**
+
+| Campo | Valor |
+| --- | --- |
+| Nombre | |
+| IP | |
+| Usuario | |
+| Contraseña | |
+| SNMPv2 | |
+
+| Campo | Valor |
+| --- | --- |
+| Nombre | |
+| IP | |
+| Usuario | |
+| Contraseña | |
+| SNMPv2 | |
+
+| Campo | Valor |
+| --- | --- |
+| Nombre | |
+| IP | |
+| Usuario | |
+| Contraseña | |
+| SNMPv2 | |
 
 ---
 
@@ -211,31 +238,35 @@ El participante **no** debe conocer la falla de antemano.
 
 ## 10. Criterios de evaluación
 
+La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2 es **simple** a propósito (API de Zabbix + una página para mostrarlo). **No** debe ponderarse ese desarrollo por encima del **uso de IA** — nos importa más cómo la usa, valida y comunica (ver consigna) que el diseño o la complejidad del frontend.
+
 | Criterio | Peso sugerido |
 | --- | --- |
-| Uso de herramientas de IA | 20% |
-| Desarrollo de la página web | 25% |
-| Infraestructura y automatización | 20% |
+| Uso de herramientas de IA | 30% |
 | Monitoreo y troubleshooting | 25% |
+| Infraestructura y automatización | 20% |
+| Desarrollo de la solución | 15% |
 | Comunicación | 10% |
 
-### Uso de IA (20%)
+### Uso de IA (30%)
 
 - Uso práctico y ordenado; buen contexto en prompts.
 - No copiar comandos peligrosos sin entender.
 - Validar, iterar, explicar.
 
-### Página web (25%)
+### Monitoreo y troubleshooting (25%)
 
-- API + token; 3 hosts; estado; problemas Parte 2; accesible; estructura mantenible.
+- Interpretar alertas; equipo ficticio vs reales; SSH diagnóstico; remediación Ansible; verificar resolución.
 
 ### Infraestructura y automatización (20%)
 
 - Linux, Docker, logs, dependencias; Ansible en Cisco; **sin** cambios manuales SSH.
 
-### Monitoreo y troubleshooting (25%)
+### Desarrollo de la solución (15%)
 
-- Interpretar alertas; equipo ficticio vs reales; SSH diagnóstico; remediación Ansible; verificar resolución.
+- Integración con la API de Zabbix (token, consultas correctas); 3 hosts; estado y problemas Parte 2.
+- Solución accesible desde el servidor de la prueba (la interfaz puede ser una página web simple).
+- Cumplir el pedido basta: **no** subir el puntaje por diseño, framework ni complejidad de frontend.
 
 ### Comunicación (10%)
 
@@ -272,7 +303,7 @@ El participante **no** debe conocer la falla de antemano.
 - Bloqueo sin comunicar.
 - Modificar Zabbix sin necesidad.
 - Exponer tokens.
-- No distinguir equipo ficticio.
+- No distinguir equipos ficticios de los reales.
 - No validar resolución.
 - Evitar Ansible.
 
@@ -281,7 +312,7 @@ El participante **no** debe conocer la falla de antemano.
 ## 13. Checklist pre-prueba (evaluador)
 
 - [ ] CML: router + switch + SNMP + SSH.
-- [ ] Zabbix: 3 hosts; ficticio con alerta SNMP; interfaces LLD en reales.
+- [ ] Zabbix: 3 hosts (ficticio + alerta SNMP); LLD en reales.
 - [ ] Usuario prueba limitado a 3 hosts; token API activo.
 - [ ] VM OCI: Docker, Ansible, rutas/firewall OK.
 - [ ] Inventario Ansible (lectura vs cambio) probado.
@@ -299,4 +330,4 @@ Prueba en **3 bloques** bien visibles:
 2. **Observabilidad** — problemas/alertas.
 3. **Operación** — falla + Ansible.
 
-Entre bloques: revisar acceso a la página y confirmar que el entorno ficticio ya muestra alertas en Parte 2 antes de simular la falla “real” en Parte 3.
+Entre bloques: revisar acceso a la página y confirmar que el equipo ficticio ya muestra su alerta SNMP en Parte 2 antes de simular la falla “real” en Parte 3 (típicamente en un equipo real).

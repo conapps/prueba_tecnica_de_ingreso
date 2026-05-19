@@ -13,13 +13,13 @@ Material para la **prueba técnica de ingreso** del área de trabajo, con foco e
 
 La prueba se desarrolla en **3 bloques**:
 
-1. **Construcción** — Página web que consume la API de Zabbix y muestra el estado de 3 equipos.
+1. **Construcción** — Página web que consume la API de Zabbix y muestra el estado de 3 hosts.
 2. **Observabilidad** — Extensión de la página para mostrar problemas/alertas activos.
 3. **Operación** — Diagnóstico de una falla simulada y remediación mediante **Ansible** (no cambios manuales en Cisco).
 
 ## Entorno (referencia rápida)
 
-- **Zabbix**: 3 hosts (router Cisco, switch Cisco, equipo ficticio con alerta SNMP).
+- **Zabbix**: 3 hosts (ficticio + alerta SNMP); LLD en reales.
 - **Red**: Cisco CML (router + switch, SSH y SNMP).
 - **Servidor Linux (OCI)**: Docker, Ansible, conectividad a Zabbix y equipos Cisco.
 
