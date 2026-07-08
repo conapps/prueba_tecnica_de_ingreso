@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Evaluador: restaurar escenario (rollback + permitir nuevo disparar-incidente).
+set -euo pipefail
+
+if [[ "$(id -un)" != ubuntu ]]; then
+  echo "restaurar-incidente: solo evaluador (ubuntu)." >&2
+  exit 1
+fi
+
+OPT_ROOT="/opt/prueba-tecnica-eval"
+STATE="${OPT_ROOT}/state/incident.triggered"
+CONF="${OPT_ROOT}/incident.conf"
+ANSIBLE_DIR="${OPT_ROOT}/ansible"
+LOG="${OPT_ROOT}/state/ansible.log"
+CREDS="${OPT_ROOT}/cisco-credentials.env"
+
+# shellcheck source=/dev/null
+source "${CONF}"
+
+: "${FAIL_HOST:?}"
+: "${FAIL_INTERFACE:?}"
+
+export ANSIBLE_CONFIG="${ANSIBLE_DIR}/ansible.cfg"
+export HOME="/home/demo"
+
+set -a
+# shellcheck source=/dev/null
+source "${CREDS}"
+set +a
+export ANSIBLE_CISCO_USER ANSIBLE_CISCO_PASSWORD ANSIBLE_CISCO_ENABLE
+
+PYVER="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export PYTHONPATH="${HOME}/.local/lib/python${PYVER}/site-packages:/usr/local/lib/python${PYVER}/dist-packages:${PYTHONPATH:-}"
+
+mkdir -p "$(dirname "${LOG}")"
+cd "${ANSIBLE_DIR}"
+
+# El log puede haber sido creado por root (disparar-incidente vía sudo).
+if [[ -e "${LOG}" && ! -w "${LOG}" ]]; then
+  rm -f "${LOG}"
+fi
+touch "${LOG}"
+
+ansible-playbook playbooks/rollback_interface.yml \
+  --limit "${FAIL_HOST}" \
+  -e "fail_host=${FAIL_HOST}" \
+  -e "fail_interface=${FAIL_INTERFACE}" \
+  >>"${LOG}" 2>&1 || true
+
+rm -f "${STATE}"
+
+echo "Escenario restaurado."
+echo "El participante puede volver a usar: disparar-incidente"

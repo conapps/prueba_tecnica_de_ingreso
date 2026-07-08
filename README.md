@@ -6,8 +6,13 @@ Material para la **prueba técnica de ingreso** del área de trabajo, con foco e
 
 | Documento | Audiencia | Descripción |
 | --- | --- | --- |
-| **[Consigna para el participante](docs/consigna-participante.md)** | Candidato/a | Texto listo para entregar al inicio de la prueba (Partes 1, 2 y 3). |
+| **[Consigna para el participante](docs/consigna-participante.md)** | Participante | Texto listo para entregar al inicio de la prueba (Partes 1, 2 y 3). |
 | **[Guía del evaluador](docs/guia-evaluador.md)** | Equipo interno | Entorno, criterios, fallas simuladas, automatismos y checklist. |
+| **[Plantilla de entrega](docs/plantilla-entrega.md)** | Participante | Accesos de esta prueba (enviar con la consigna). |
+| **[Plantilla de entrega (formato)](docs/plantilla-entrega-example.md)** | Equipo interno | Formato vacío para otra prueba. |
+| **[Notas del evaluador](docs/plantilla-evaluador.md)** | Equipo interno | Zabbix, Ansible y plan de fallas (instancia actual). |
+| **[Notas del evaluador (formato)](docs/plantilla-evaluador-example.md)** | Equipo interno | Formato vacío. |
+| **[Host setup (VM demo)](host-setup/README.md)** | Equipo interno | Bootstrap completo: CML, OCI, Zabbix, scripts en la VM. |
 
 ## Resumen de la prueba
 
@@ -19,8 +24,8 @@ La prueba se desarrolla en **3 bloques**:
 
 ## Entorno (referencia rápida)
 
-- **Zabbix**: 3 hosts (ficticio + alerta SNMP); LLD en reales.
-- **Red**: Cisco CML (router + switch, SSH y SNMP).
-- **Servidor Linux (OCI)**: Docker, Ansible, conectividad a Zabbix y equipos Cisco.
+- **CML**: 3 equipos Cisco; baseline = SNMP mal configurado solo en Zabbix en un switch.
+- **Red**: Cisco CML (router + 2 switches, SSH y SNMP).
+- **Servidor Linux (OCI)**: usuario SSH **`demo`** (participante), Ansible, Docker opcional; conectividad a Zabbix y Cisco. Evaluador: **`ubuntu`**.
 
 Para detalle de infraestructura, credenciales, criterios de evaluación y procedimientos del evaluador, ver [guía del evaluador](docs/guia-evaluador.md).

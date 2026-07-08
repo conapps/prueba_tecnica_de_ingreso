@@ -1,0 +1,10 @@
+---
+# Credenciales de cambio: inyectadas en runtime.
+ansible_connection: network_cli
+ansible_network_os: cisco.ios.ios
+ansible_user: "{{ lookup('env', 'ANSIBLE_CISCO_USER') }}"
+ansible_password: "{{ lookup('env', 'ANSIBLE_CISCO_PASSWORD') }}"
+ansible_become: true
+ansible_become_method: enable
+ansible_become_password: "{{ lookup('env', 'ANSIBLE_CISCO_ENABLE') }}"
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

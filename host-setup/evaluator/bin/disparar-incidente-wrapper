@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Wrapper en /usr/local/bin — participante ejecuta sin escribir sudo.
+exec /usr/bin/sudo -n /opt/prueba-tecnica-eval/bin/disparar-incidente "$@"

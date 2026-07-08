@@ -1,0 +1,9 @@
+# Instancias con secretos reales (usar *-example.md / env.example como formato)
+docs/plantilla-entrega.md
+docs/plantilla-evaluador.md
+host-setup/env.prueba-tecnica
+host-setup/evaluator/cisco-credentials.env
+host-setup/keys/demo-access
+!host-setup/keys/README.md
+!host-setup/keys/.gitkeep
+!host-setup/keys/demo-access.pub

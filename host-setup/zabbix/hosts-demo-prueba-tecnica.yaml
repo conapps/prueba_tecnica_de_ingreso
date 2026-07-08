@@ -1,0 +1,58 @@
+zabbix_export:
+  version: '6.0'
+  date: '2026-07-08T18:32:45Z'
+  groups:
+    - uuid: 546ba9f7a03c4309bd483aa9a8bec212
+      name: demo
+  hosts:
+    - host: RTR-Prod-Gateway1
+      name: RTR-Prod-Gateway1
+      templates:
+        - name: 'Cisco IOS by SNMP'
+      groups:
+        - name: demo
+      interfaces:
+        - type: SNMP
+          ip: 10.0.0.80
+          port: '161'
+          details:
+            community: '{$SNMP_COMMUNITY}'
+          interface_ref: if1
+      macros:
+        - macro: '{$SNMP_COMMUNITY}'
+          value: snmp-demo
+      inventory_mode: DISABLED
+    - host: SW-Prod-Core1
+      name: SW-Prod-Core1
+      templates:
+        - name: 'Cisco IOS by SNMP'
+      groups:
+        - name: demo
+      interfaces:
+        - type: SNMP
+          ip: 10.0.0.81
+          port: '161'
+          details:
+            community: '{$SNMP_COMMUNITY}'
+          interface_ref: if1
+      macros:
+        - macro: '{$SNMP_COMMUNITY}'
+          value: snmp-demo
+      inventory_mode: DISABLED
+    - host: SW-Prod-Edge1
+      name: SW-Prod-Edge1
+      templates:
+        - name: 'Cisco IOS by SNMP'
+      groups:
+        - name: demo
+      interfaces:
+        - type: SNMP
+          ip: 10.0.0.82
+          port: '161'
+          details:
+            community: '{$SNMP_COMMUNITY}'
+          interface_ref: if1
+      macros:
+        - macro: '{$SNMP_COMMUNITY}'
+          value: snmp-bad
+      inventory_mode: DISABLED

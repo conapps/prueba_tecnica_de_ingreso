@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Quitar playbooks del participante anterior — solo evaluador (ubuntu).
+set -euo pipefail
+
+if [[ "$(id -un)" != ubuntu ]]; then
+  echo "lab-reset: solo evaluador (ubuntu)." >&2
+  exit 1
+fi
+
+DIR="/home/demo/prueba-tecnica/ansible/playbooks/participante"
+
+shopt -s nullglob
+files=("${DIR}"/*.yml)
+if ((${#files[@]} == 0)); then
+  echo "No hay playbooks .yml en ${DIR}."
+else
+  sudo rm -f "${files[@]}"
+  echo "Eliminados ${#files[@]} playbook(s) en playbooks/participante/."
+fi
+
+echo "Revisá servicios del participante en /home/demo (docker, podman, procesos, etc.)"

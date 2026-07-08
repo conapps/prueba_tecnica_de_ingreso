@@ -1,6 +1,6 @@
 # Guía del evaluador — Prueba técnica DevOps
 
-Documento interno. La consigna para el candidato está en [consigna-participante.md](consigna-participante.md).
+Documento interno. La consigna para el participante está en [consigna-participante.md](consigna-participante.md).
 
 ---
 
@@ -25,99 +25,60 @@ La prueba **no** busca evaluar solamente conocimientos técnicos puros, sino tam
 
 ### Infraestructura de red (Cisco CML)
 
-- 1 router Cisco IOS.
-- 1 switch Cisco IOS.
-- Ambos conectados entre sí.
-- SSH habilitado en ambos.
-- SNMP habilitado para monitoreo desde Zabbix.
+- 3 equipos Cisco funcionales en el lab (1 router + 2 switches).
+- Conectados entre sí según la topología del entorno.
+- SSH habilitado en los tres.
+- SNMP habilitado en los equipos para monitoreo desde Zabbix.
 
 ### Zabbix
 
-Deben existir **3 hosts** visibles para la prueba:
+Deben existir **3 hosts** visibles para la prueba (mismos nombres que en la [plantilla de entrega](plantilla-entrega.md)):
 
 1. Router Cisco IOS.
-2. Switch Cisco IOS.
-3. Equipo ficticio/simulado.
+2. Switch Cisco IOS (core).
+3. Switch Cisco IOS (edge) como equipo ficticio/simulado.
+
+**Baseline Parte 2:** en **uno** de los switches (típicamente el edge), configurar en Zabbix una community SNMP **incorrecta** respecto al equipo real. El equipo en CML sigue operativo; la alerta aparece solo en monitoreo. **No** es la falla de la Parte 3.
 
 **Requisitos:**
 
-| Requisito | Detalle |
-| --- | --- |
-| Equipos reales | monitoreados; todas las interfaces descubiertas |
-| Equipo ficticio | con al menos una alerta SNMP activa (referencia para Parte 2) |
-| Independencia | Router y switch reales monitoreables por separado |
-| Falla simulable | Posibilidad de corte o problema entre router y switch |
-| Usuario prueba | Solo ve esos 3 hosts; sin acceso al resto del ambiente |
-| API token | Lectura: hosts, problemas, triggers, eventos |
+
+| Requisito        | Detalle                                                 |
+| ---------------- | ------------------------------------------------------- |
+| Equipos en CML   | Los 3 funcionales; interfaces descubiertas en Zabbix    |
+| Baseline Parte 2 | Un switch con community SNMP errónea **solo en Zabbix** |
+| Independencia    | Los 3 monitoreables por separado                        |
+| Falla simulable  | Posibilidad de corte o problema en enlace de datos      |
+| Usuario prueba   | Solo ve esos 3 hosts; sin acceso al resto del ambiente  |
+| API token        | Lectura: hosts, problemas, triggers, eventos            |
+
 
 ### Servidor Linux en OCI
 
-| Componente | Requisito |
-| --- | --- |
-| Acceso | SSH para el participante |
-| Software | Docker, Ansible |
-| Conectividad | Zabbix, equipos Cisco (SSH), salida HTTP/HTTPS |
-| Ansible | Inventario/vars con permisos de **cambio** en Cisco |
-| SSH lectura | Credenciales separadas solo diagnóstico |
+
+| Componente   | Requisito                                           |
+| ------------ | --------------------------------------------------- |
+| Acceso       | Credenciales SSH separadas para evaluador y participante |
+| Software     | Ansible; Docker preinstalado (opcional — stack libre) |
+| Conectividad | Zabbix, equipos Cisco (SSH), salida HTTP/HTTPS      |
+| Ansible      | Inventario/vars con permisos de **cambio** en Cisco |
+| SSH lectura  | Credenciales separadas solo diagnóstico             |
+
 
 ---
 
-## 3. Datos que se entregan al participante
+## 3. Datos a completar y entregar
 
-Ver checklist en [consigna-participante.md](consigna-participante.md#qué-te-entregamos-al-iniciar).
+Completar **[plantilla-entrega.md](plantilla-entrega.md)** (participante) y **[plantilla-evaluador.md](plantilla-evaluador.md)** (interno) al inicio de cada prueba. 
 
-**Plantilla de entrega** (completar al inicio):
+Formatos vacíos: [plantilla-entrega-example.md](plantilla-entrega-example.md), [plantilla-evaluador-example.md](plantilla-evaluador-example.md).
 
-**Servidor Linux**
+Al participante hay que entregarle: [consigna](consigna-participante.md) + **plantilla-entrega** + archivo **`host-setup/keys/demo-access`**.
 
-| Campo | Valor |
-| --- | --- |
-| Host | |
-| Usuario | |
-| Puerto SSH | |
-| Notas | |
-
-**Ansible (cambios)**
-
-| Campo | Valor |
-| --- | --- |
-| Inventario | |
-| Grupo / vars | |
-
-**Zabbix**
-
-| Campo | Valor |
-| --- | --- |
-| URL | |
-| Usuario | |
-| Contraseña | |
-| Token | |
-
-**Equipos**
-
-| Campo | Valor |
-| --- | --- |
-| Nombre | |
-| IP | |
-| Usuario | |
-| Contraseña | |
-| SNMPv2 | |
-
-| Campo | Valor |
-| --- | --- |
-| Nombre | |
-| IP | |
-| Usuario | |
-| Contraseña | |
-| SNMPv2 | |
-
-| Campo | Valor |
-| --- | --- |
-| Nombre | |
-| IP | |
-| Usuario | |
-| Contraseña | |
-| SNMPv2 | |
+```bash
+bash host-setup/install-on-demo-vm.sh demoN.dominio
+bash host-setup/scripts/deploy/print-install-summary.sh demoN.dominio
+```
 
 ---
 
@@ -125,7 +86,7 @@ Ver checklist en [consigna-participante.md](consigna-participante.md#qué-te-ent
 
 Página web que consulte la API de Zabbix y muestre estado y alertas de 3 equipos; luego diagnóstico y remediación con Ansible ante falla simulada.
 
-**Documento para el candidato:** [consigna-participante.md](consigna-participante.md)
+**Documento para el participante:** [consigna-participante.md](consigna-participante.md)
 
 ---
 
@@ -139,13 +100,13 @@ Página web que consulte la API de Zabbix y muestre estado y alertas de 3 equipo
 
 ### Condiciones
 
-- Corre en servidor Linux (host o contenedor).
-- Accesible por navegador; participante informa URL/puerto.
+- Corre en servidor Linux (stack libre: Docker, Podman, proceso en host, etc.).
+- Accesible por navegador; al cierre de la prueba el participante informa URL/puerto.
 - Sin auth en la página; sin diseño elaborado.
 
-### Checkpoint evaluador
+### Checkpoint evaluador (opcional)
 
-> Cuando termines esta primera parte, avisame y mostrame cómo acceder a la página.
+El participante **no** está obligado a avisar al terminar la Parte 1. Podés revisar cuando quieras o al cierre de la Parte 3.
 
 ---
 
@@ -161,23 +122,40 @@ Página web que consulte la API de Zabbix y muestre estado y alertas de 3 equipo
 - Solo hosts de la prueba.
 - API Zabbix; refresh manual o automático.
 
-### Checkpoint evaluador
+### Checkpoint evaluador (opcional)
 
-> Cuando termines esta segunda parte, avisame. Luego vamos a simular un problema.
+Igual que la Parte 1: el participante puede encadenar Parte 2 → Parte 3 sin avisarte. Validá baseline SNMP en Edge cuando revises o antes de la verificación final.
 
 ---
 
 ## 7. Parte 3 — Simulación de falla y troubleshooting
 
-### Acción del evaluador (elegir una)
+### Activación del incidente (self-service)
 
-| Opción | Acción | Rollback |
-| --- | --- | --- |
-| **A** | `shutdown` en interfaz | `no shutdown` |
-| **B** | Eliminar ruta en router | Restaurar ruta |
-| **C** | Cortar enlace router–switch | Restaurar enlace |
+El participante ejecuta en el servidor:
 
-La falla debe ser **conocida** por el evaluador y con **rollback** documentado.
+```bash
+disparar-incidente
+```
+
+- **Sin escribir `sudo`**: el wrapper en `/usr/local/bin/disparar-incidente` usa `sudo -n` solo para el script en `/opt` (NOPASSWD en sudoers).
+- Automatismo en `/opt/prueba-tecnica-eval/` (root; sin lectura directa para `demo`).
+- Salida al participante: **solo** el mensaje de confirmación (detalle Ansible en `/opt/prueba-tecnica-eval/state/ansible.log`, evaluador).
+- El usuario `demo` **no** tiene sudo libre (solo los dos comandos whitelisteados). No compartir `ubuntu` al participante.
+- Configuración del incidente: `/opt/prueba-tecnica-eval/incident.conf` (evaluador).
+- **Restaurar escenario (solo evaluador):** `restaurar-incidente` — rollback + borrar `state/incident.triggered` (no hace falta `rm` manual).
+
+### Tipo de falla (configurar en `incident.conf`)
+
+
+| Opción | Acción                      | Rollback         |
+| ------ | --------------------------- | ---------------- |
+| **A**  | `shutdown` en interfaz      | `no shutdown`    |
+| **B**  | Eliminar ruta en router     | Restaurar ruta   |
+| **C**  | Cortar enlace router–switch | Restaurar enlace |
+
+
+La falla debe ser **conocida** por el evaluador y con **rollback** documentado. Es **distinta** de la alerta baseline de Parte 2 (SNMP mal configurado solo en Zabbix).
 
 ### Pedido al participante
 
@@ -202,7 +180,55 @@ La falla debe ser **conocida** por el evaluador y con **rollback** documentado.
 
 ## 9. Automatismos de falla y rollback (evaluador)
 
-El participante **no** debe conocer la falla de antemano.
+El participante **no** debe conocer la falla de antemano ni leer los playbooks en `/opt`.
+
+### Comandos en la VM demo (evaluador)
+
+Completar antes `host-setup/env.prueba-tecnica` y `host-setup/evaluator/cisco-credentials.env` (ver [host-setup/README.md](../host-setup/README.md)).
+
+**Desde tu máquina** (repo `prueba_tecnica_de_ingreso`), desplegar o actualizar el entorno del participante:
+
+```bash
+bash host-setup/install-on-demo-vm.sh demoN.dominio
+```
+
+**En la VM** — evaluador: SSH como **`ubuntu`**. Participante: SSH como **`demo`**.
+
+Tras el install, en sesión **`ubuntu`**: `lab-check`, `lab-reset` y `restaurar-incidente` (PATH en `/opt/prueba-tecnica-eval/bin/` vía `/etc/profile.d` y `~/.zshrc`). En sesión **`demo`**: `lab-ansible` y `disparar-incidente`. **`demo` no accede a `/opt/prueba-tecnica-eval/` ni ejecuta comandos de evaluador.**
+
+```bash
+lab-check                  # ping + Ansible + SNMP (chequeo rápido del lab)
+disparar-incidente         # probar activación Parte 3 (participante usa este mismo comando)
+restaurar-incidente        # rollback + borrar lock para otro `disparar-incidente`
+lab-reset                  # borrar playbooks en `playbooks/participante/` del participante actual
+```
+
+| Comando | Quién | Cuándo |
+| --- | --- | --- |
+| `lab-check` | Evaluador | Tras `install-on-demo-vm.sh` y antes de recibir al participante |
+| `disparar-incidente` | Participante (`demo`; evaluador puede probar) | Inicio Parte 3 |
+| `restaurar-incidente` | Evaluador | Tras Parte 3: rollback red + lock para otro `disparar-incidente` |
+| `lab-reset` | Evaluador | Borrar playbooks en `playbooks/participante/` del participante actual |
+
+El script `install-on-demo-vm.sh` es para la **primera preparación** de la VM o cuando **actualizás** algo del repo `host-setup/` (inventario, scripts, `/opt`, credenciales).
+
+
+| Qué restaura | Cómo |
+| --- | --- |
+| Falla simulada Parte 3 (ej. interfaz down) | `restaurar-incidente` |
+| Lock `disparar-incidente` (una vez por prueba) | `restaurar-incidente` (incluye `rm` del lock) |
+| Playbooks del participante | `lab-reset` |
+| Inventario, scripts, `/opt`, `/home/demo/prueba-tecnica/.env.prueba-tecnica` | Sin cambios (siguen del install) |
+
+**Reset fuerte** (opcional): `bash host-setup/install-on-demo-vm.sh demoN...` resincroniza en `/home/demo/prueba-tecnica/` solo `ansible/` y `scripts/` (participante). Install, `env.example`, `python/` y scripts de evaluador **no** van al home de `demo`.
+
+| Ruta | Uso |
+| --- | --- |
+| `/opt/prueba-tecnica-eval/incident.conf` | `FAIL_HOST`, `FAIL_INTERFACE` |
+| `/usr/local/bin/disparar-incidente` | Participante — `disparar-incidente` (una vez, sin sudo) |
+| `/opt/prueba-tecnica-eval/bin/restaurar-incidente` | Evaluador — `restaurar-incidente` (rollback + borrar lock) |
+
+Detalle de instalación: [host-setup/README.md](../host-setup/README.md).
 
 ### Ejemplo Ansible — generar falla (interfaz)
 
@@ -240,13 +266,15 @@ El participante **no** debe conocer la falla de antemano.
 
 La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2 es **simple** a propósito (API de Zabbix + una página para mostrarlo). **No** debe ponderarse ese desarrollo por encima del **uso de IA** — nos importa más cómo la usa, valida y comunica (ver consigna) que el diseño o la complejidad del frontend.
 
-| Criterio | Peso sugerido |
-| --- | --- |
-| Uso de herramientas de IA | 30% |
-| Monitoreo y troubleshooting | 25% |
-| Infraestructura y automatización | 20% |
-| Desarrollo de la solución | 15% |
-| Comunicación | 10% |
+
+| Criterio                         | Peso sugerido |
+| -------------------------------- | ------------- |
+| Uso de herramientas de IA        | 30%           |
+| Monitoreo y troubleshooting      | 25%           |
+| Infraestructura y automatización | 20%           |
+| Desarrollo de la solución        | 15%           |
+| Comunicación                     | 10%           |
+
 
 ### Uso de IA (30%)
 
@@ -256,11 +284,11 @@ La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2
 
 ### Monitoreo y troubleshooting (25%)
 
-- Interpretar alertas; equipo ficticio vs reales; SSH diagnóstico; remediación Ansible; verificar resolución.
+- Interpretar alertas; distinguir alerta baseline (Zabbix) vs falla simulada Parte 3; SSH diagnóstico; remediación Ansible; verificar resolución.
 
 ### Infraestructura y automatización (20%)
 
-- Linux, Docker, logs, dependencias; Ansible en Cisco; **sin** cambios manuales SSH.
+- Linux, runtime libre, logs; Ansible en Cisco; **sin** cambios manuales SSH.
 
 ### Desarrollo de la solución (15%)
 
@@ -303,7 +331,7 @@ La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2
 - Bloqueo sin comunicar.
 - Modificar Zabbix sin necesidad.
 - Exponer tokens.
-- No distinguir equipos ficticios de los reales.
+- No confundir la alerta baseline (SNMP en Zabbix) con el incidente de Parte 3.
 - No validar resolución.
 - Evitar Ansible.
 
@@ -311,14 +339,21 @@ La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2
 
 ## 13. Checklist pre-prueba (evaluador)
 
-- [ ] CML: router + switch + SNMP + SSH.
-- [ ] Zabbix: 3 hosts (ficticio + alerta SNMP); LLD en reales.
-- [ ] Usuario prueba limitado a 3 hosts; token API activo.
-- [ ] VM OCI: Docker, Ansible, rutas/firewall OK.
+Instalación en la VM e import de hosts: [host-setup/README.md](../host-setup/README.md).
+
+- [ ] CML: 3 equipos funcionales; SSH y SNMP en cada uno (`10.0.0.80`–`82`).
+- [ ] VM demo: `make up-services` / `start` con `instance_suffix=N` (rol `demo`: usuario Linux **`demo`**, Docker, Ansible).
+- [ ] Zabbix: `make up` + token usuario `demo`; import [`hosts-demo-prueba-tecnica.yaml`](../host-setup/zabbix/hosts-demo-prueba-tecnica.yaml).
+- [ ] VM demo: `bash host-setup/install-on-demo-vm.sh demoN...`; `env.prueba-tecnica` + `cisco-credentials.env` desplegados.
+- [ ] Clave participante: `host-setup/keys/demo-access` (misma en todo el lab)
+- [ ] En la VM (ubuntu): `lab-check` OK; participante puede SSH como `demo`.
+- [ ] Verificar baseline: alerta en Zabbix vs equipo real operativo por SSH/SNMP.
+- [ ] VM Linux: Ansible, conectividad, rutas/firewall OK (Docker opcional para el participante).
 - [ ] Inventario Ansible (lectura vs cambio) probado.
-- [ ] Playbooks falla/rollback probados.
-- [ ] Consigna impresa o enviada: [consigna-participante.md](consigna-participante.md).
-- [ ] Plantilla de credenciales completada.
+- [ ] Incidente self-service: `disparar-incidente` (participante) probado; `restaurar-incidente` (evaluador) OK.
+- [ ] Consigna enviada: [consigna-participante.md](consigna-participante.md).
+- [ ] Plantilla de entrega completada: [plantilla-entrega.md](plantilla-entrega.md).
+- [ ] Notas del evaluador completadas: [plantilla-evaluador.md](plantilla-evaluador.md).
 
 ---
 
@@ -330,4 +365,4 @@ Prueba en **3 bloques** bien visibles:
 2. **Observabilidad** — problemas/alertas.
 3. **Operación** — falla + Ansible.
 
-Entre bloques: revisar acceso a la página y confirmar que el equipo ficticio ya muestra su alerta SNMP en Parte 2 antes de simular la falla “real” en Parte 3 (típicamente en un equipo real).
+Entre bloques: validar Parte 2; el participante activa el incidente con `disparar-incidente` (está en la consigna).

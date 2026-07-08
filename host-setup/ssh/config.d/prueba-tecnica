@@ -1,0 +1,15 @@
+# Equipos Cisco — prueba técnica (usuario demo = solo lectura)
+Host RTR-Prod-Gateway1 10.0.0.80
+    HostName 10.0.0.80
+    User demo
+    KexAlgorithms +diffie-hellman-group14-sha1
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
+
+Host SW-Prod-Core1 10.0.0.81
+    HostName 10.0.0.81
+    User demo
+
+Host SW-Prod-Edge1 10.0.0.82
+    HostName 10.0.0.82
+    User demo

@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec sudo -n /opt/prueba-tecnica-eval/bin/ansible-participante "$@"

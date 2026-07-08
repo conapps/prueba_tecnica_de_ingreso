@@ -9,86 +9,91 @@
 
 ## Contexto
 
-Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts** con nombres fijos:
+Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts**:
 
-| Host name en Zabbix | Rol | Tipo |
-| --- | --- | --- |
-| `RTR-Prod-Gateway1` | Router | Cisco IOS |
-| `SW-Prod-Core1` | Switch core | Cisco IOS |
-| `SW-Prod-Edge1` | Switch edge | Cisco IOS |
 
-**Diagrama del ambiente:**
+| Host    | Rol         | Tipo      |
+| ------- | ----------- | --------- |
+| `Host1` | Router      | Cisco IOS |
+| `Host2` | Switch core | Cisco IOS |
+| `Host3` | Switch edge | Cisco IOS |
+
+
+> **💡 Nota:** Los nombres te los entregamos en la plantilla de entrega.
+
+**Diagrama del ambiente (referencia):**
 
 ```
                             [ Zabbix ] ←→ [ VM Linux ] → [ Solución web ]
                                 |              |
                             +---------------------+---------------------+
                             |                                           |
-                        [SW-Prod-Edge1] ←→ [RTR-Prod-Gateway1] ←→ [SW-Prod-Core1]
+                        [Switch edge] ←→ [Router] ←→ [Switch core]
 ```
 
-Tu tarea es construir una **página web simple** que consuma la API de Zabbix con el **token** que te entregamos y muestre información operativa de `RTR-Prod-Gateway1`, `SW-Prod-Core1` y `SW-Prod-Edge1` únicamente.
+Tu tarea es construir una **página web simple** que consuma la API de Zabbix y muestre información operativa de **esos 3 hosts únicamente** (mismos nombres que en Zabbix). Las credenciales de la API están en el servidor (ver abajo).
 
 ---
 
 ## Qué te entregamos al iniciar
 
-Al comenzar la prueba recibirás credenciales y datos de acceso. Guardalos de forma segura y **no los compartas** ni los subas a repositorios públicos.
+Al comenzar la prueba recibirás credenciales y datos de acceso (hosts, IPs, usuarios). 
+
+Guardalos de forma segura y **no los compartas** ni los subas a repositorios públicos.
 
 ### Servidor Linux
 
+Datos del servidor:
 
-| Dato       | Descripción                       |
-| ---------- | --------------------------------- |
-| IP o DNS   | Dirección para conectarte por SSH |
-| Usuario    | Acceso al servidor de la prueba   |
-| Clave      | Acceso al servidor de la prueba   |
-| Puerto SSH | Puesto por defecto (22)           |
-
-
-> Datos del servidor Linux:
->
-> - En el servidor tenés disponibles, entre otras cosas: **Docker**, **Ansible** y conectividad hacia Zabbix y los equipos Cisco.
-> - **Ansible** — automatización con permisos de cambio
-> - **Inventario** — ya configurado (hosts, grupos y credenciales de acceso) para que **Ansible** se conecte a los equipos Cisco reales con permisos para **remediar**. No tenés que armar el inventario desde cero en la prueba: usalo tal como viene y concentrate el esfuerzo en los **playbooks**. Esos permisos de cambio se usan **solo desde Ansible**, no desde una sesión SSH manual.
+- **Directorio de trabajo:** `~/prueba-tecnica/` — inventario Ansible, variables Zabbix, playbooks y tu aplicación. Creá ahí todo lo que necesites para la prueba.
+- En el servidor tenés disponibles, entre otras cosas: **Ansible** y herramientas comunes (incluido **Docker** preinstalado por comodidad).
+  - **Ansible** — automatización con permisos de cambio (vía `lab-ansible`).
+  - **Inventario** — ya configurado (hosts, grupos y credenciales de acceso) para que **Ansible** se conecte a los equipos Cisco reales con permisos para **remediar**. No tenés que armar el inventario desde cero: usalo tal como viene y concentrate el esfuerzo en los **playbooks**. Esos permisos de cambio se usan **solo desde Ansible**, no desde una sesión SSH manual en Cisco.
+  - **Cómo levantar tu app** — **stack libre**: podés usar Docker, Podman, Kubernetes, un proceso en el host, etc.
+  - Docker viene instalado para ahorrar tiempo.
+- Conectividad hacia Zabbix y los equipos Cisco.
 
 ### Zabbix
 
+Datos de Zabbix:
 
-| URL                                         | Usuario | Contraseña   | API Token                   |
-| ------------------------------------------- | ------- | ------------ | --------------------------- |
-| `https://zabbixX.conatel-lab.conatel.cloud` | `demo`  | `Zabbix123!` | Te lo entregamos al iniciar |
-
+- Los 3 hosts ya están configurados en Zabbix con el rol correspondiente.
+- La UI web de Zabbix no la vas a necesitar; algunos clientes o métodos de la API pueden pedir usuario y contraseña además del token.
+- URL, usuario, contraseña y token de la API están en variables en el archivo `~/prueba-tecnica/.env.prueba-tecnica` en el servidor Linux.
+  - `ZABBIX_URL`: URL de la API de Zabbix.
+  - `ZABBIX_USER`: Usuario de la API de Zabbix.
+  - `ZABBIX_PASSWORD`: Contraseña de la API de Zabbix.
+  - `ZABBIX_TOKEN`: Token de la API de Zabbix.
+  - Se cargan al abrir sesión SSH; también podés leer ese archivo desde tu aplicación (por ejemplo `env_file` en Docker).
+  - **No** hardcodees esos valores en el código.
 
 ### Equipos Cisco
 
+Datos de los equipos Cisco:
 
-| Host Zabbix         | IP           | Usuario SSH | Contraseña SSH | SNMPv2      |
-| ------------------- | ------------ | ----------- | -------------- | ----------- |
-| `RTR-Prod-Gateway1` | `10.0.0.80` | `demo`      | `Demo123!`     | `snmp-demo` |
-| `SW-Prod-Core1`     | `10.0.0.81` | `demo`      | `Demo123!`     | `snmp-demo` |
-| `SW-Prod-Edge1`     | `10.0.0.82` | `demo`      | `Demo123!`     | `snmp-demo` |
+- Los 3 hosts ya están configurados con SSH y SNMP.
 
-
-**Regla:** El acceso SSH es **únicamente para diagnóstico**. **No** debés aplicar cambios manuales por SSH en los equipos.
+> **Regla:** El acceso SSH es **únicamente para diagnóstico**. 
+> **No** debés aplicar cambios manuales por SSH en los equipos.
 
 ---
 
 ## Reglas generales
 
-- La solución debe **correr en el servidor Linux** provisto (directo en el host o en contenedor).
-- Debe ser **accesible por navegador** (indicá URL y puerto al finalizar cada parte).
+- La solución debe **correr en el servidor Linux** provisto (proceso directo, contenedor, orquestador, etc.).
+- Desplegá tu solución y archivos propios dentro de **`~/prueba-tecnica/`** (salvo lo ya provisto).
+- Debe ser **accesible por navegador** desde el servidor de la prueba.
 - **No** hace falta autenticación en la página web ni diseño visual avanzado.
 - **No** hardcodees credenciales en el código: usá variables de entorno o archivos de config fuera del repositorio.
-- Consultá Zabbix **solo vía API** con el **token** entregado (no hace falta entrar ni modificar Zabbix por la interfaz web).
-- La solución debe mostrar: `RTR-Prod-Gateway1`, `SW-Prod-Core1` y `SW-Prod-Edge1`.
+- Consultá Zabbix **solo vía API** con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica` (no hace falta entrar ni modificar Zabbix por la interfaz web).
+- La solución debe mostrar los **3 hosts** de la prueba (nombres en la entrega al iniciar).
 - Ante la Parte 3: **diagnóstico** por SSH lectura; **corrección** solo con **Ansible**.
 
 **Stack libre:** elegí la tecnología que te resulte más cómoda.
 
 ---
 
-## Parte 1 — Estado de los equipos
+## Parte 1 — Web con estado de los equipos
 
 **Objetivo:** Crear una página web que muestre el **estado general** de los 3 equipos monitoreados, consultando la API de Zabbix.
 
@@ -107,22 +112,18 @@ La página debe mostrar, como mínimo:
 ### Ejemplo de salida esperada
 
 
-| Equipo            | Estado        |
-| ----------------- | ------------- |
-| RTR-Prod-Gateway1 | Disponible    |
-| SW-Prod-Core1     | Disponible    |
-| SW-Prod-Edge1     | No disponible |
+| Equipo      | Estado        |
+| ----------- | ------------- |
+| Router      | Disponible    |
+| Switch core | Disponible    |
+| Switch edge | No disponible |
 
 
 ### Condiciones
 
-- Consumir la API con el **token** provisto.
+- Consumir la API con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica`.
 - La app debe estar **corriendo y accesible** desde el servidor de la prueba.
 - Podés refrescar manualmente o automáticamente; no es obligatorio un frontend complejo.
-
-### Al finalizar la Parte 1
-
-> **Avisanos cuando termines** y mostranos **cómo acceder a la página** (URL, puerto y, si aplica, comando para levantarla).
 
 ---
 
@@ -130,16 +131,18 @@ La página debe mostrar, como mínimo:
 
 **Objetivo:** Extender la página para mostrar **problemas activos** de los equipos de la prueba.
 
+> **💡 Nota:** Al llegar a esta parte puede haber **alertas ya presentes** en Zabbix (por ejemplo, un host que sigue operativo pero con un problema de monitoreo). Tu página debe **mostrarlas**.
+
 ### Pedido
 
 **1. Tabla resumen** — Agregar a la salida de la Parte 1 la **cantidad de problemas activos** por equipo:
 
 
-| Equipo            | Estado        | Problemas activos |
-| ----------------- | ------------- | ----------------- |
-| RTR-Prod-Gateway1 | Disponible    | 0                 |
-| SW-Prod-Core1     | Disponible    | 0                 |
-| SW-Prod-Edge1     | No disponible | 1                 |
+| Equipo      | Estado        | Problemas activos |
+| ----------- | ------------- | ----------------- |
+| Router      | Disponible    | 0                 |
+| Switch core | Disponible    | 0                 |
+| Switch edge | No disponible | 1                 |
 
 
 **2. Detalle de alertas** — Nueva sección o tabla con los problemas activos. Como mínimo:
@@ -157,10 +160,9 @@ La página debe mostrar, como mínimo:
 ### Ejemplo de detalle
 
 
-| Equipo            | Alerta           | Severidad | Desde |
-| ----------------- | ---------------- | --------- | ----- |
-| SW-Prod-Edge1     | SNMP unavailable | High      | 10:32 |
-| RTR-Prod-Gateway1 | Interface down   | Average   | 10:45 |
+| Equipo      | Alerta           | Severidad | Desde |
+| ----------- | ---------------- | --------- | ----- |
+| Switch edge | SNMP unavailable | High      | 10:32 |
 
 
 ### Condiciones
@@ -169,28 +171,39 @@ La página debe mostrar, como mínimo:
 - Mostrar **solo** problemas de los 3 hosts de la prueba.
 - Actualización manual o automática: a tu criterio.
 
-### Al finalizar la Parte 2
-
-> **Avisanos cuando termines.** Vamos a **simular una falla** en el entorno para validar que tu página la detecta.
-
 ---
 
-## Parte 3 — Falla simulada, diagnóstico y remediación
+## Parte 3 — Ansible con diagnóstico y remediación
 
-**Objetivo:** Ante un problema real introducido en el entorno, **identificar la causa**, explicarla y **corregirla con Ansible**.
+**Objetivo:** Ante un problema introducido en el entorno, **identificar la causa**, explicarla y **corregirla con Ansible**.
 
-> **⚠️ No sabés de antemano qué falla vamos a generar.** Solo sabés que habrá un incidente operativo que deberás investigar.
+> **⚠️ No sabés de antemano qué falla se va a generar.** Solo sabés que habrá un incidente operativo que deberás investigar.
 
-El evaluador generará una **falla controlada** la cual podrás ver en tu solución (si la Parte 2 fue exitosa).
+> 💡 Vamos a **simular una falla** en el entorno para que puedas validar que tu página la detecta (y así verificar si la Parte 2 fue exitosa); después debés seguir con el diagnóstico y la remediación.
+
+### Activar el incidente (Parte 3)
+
+Ejecutá en el servidor Linux:
+
+```bash
+disparar-incidente
+```
+
+- **No** requiere `sudo` (el sistema eleva permisos por detrás).
+- Solo podés ejecutarlo **una vez** durante tu prueba.
+- La salida del comando es solo un mensaje de confirmación; **no** muestra detalles del cambio aplicado.
+- Esperá unos minutos a que Zabbix refleje el problema y revisá tu solución.
+
+Después investigá y remediá **por tu cuenta** con Ansible hasta considerar resuelto el incidente.
 
 ### Qué esperamos que hagas vos
 
 1. **Detectar** el problema en tu solución.
 2. **Identificar** el equipo afectado y la alerta relevante.
-3. Puedes conectarte por SSH al equipo o equipos afectados (con usuario de solo lectura) y revisar el estado del equipo afectado.
+3. **Podés conectarte por SSH** al equipo o equipos afectados (usuario de solo lectura de la plantilla; en el servidor tenés aliases `ssh-rtr`, `ssh-core`, `ssh-edge`) y revisar el estado.
 4. **Explicar** la causa probable y la solución propuesta (podés usar IA y documentación; validá antes de ejecutar).
-5. **Escribir uno o varios playbooks Ansible** que corrijan el problema.
-6. **Ejecutarlos** desde el servidor Linux con el **inventario provisto**.
+5. **Escribir uno o varios playbooks Ansible** en `~/prueba-tecnica/ansible/playbooks/participante/` que corrijan el problema.
+6. **Ejecutarlos** con `lab-ansible <tu-playbook.yml>` (usa el inventario provisto).
 7. **Validar** que el incidente quedó resuelto: alerta en recuperación o cerrada en tu solución, estado coherente en tu solución y, si aplica, contraste con diagnóstico por SSH de solo lectura.
 
 ### Remediación con Ansible (detalle)
@@ -198,35 +211,27 @@ El evaluador generará una **falla controlada** la cual podrás ver en tu soluci
 
 | Paso        | Qué esperamos                                                                                |
 | ----------- | -------------------------------------------------------------------------------------------- |
-| Inventario  | Usar el que te entregamos (credenciales de **cambio** ya cargadas).                          |
-| Playbook(s) | Código tuyo: tareas idempotentes que apliquen la corrección al equipo afectado.              |
-| Ejecución   | Ejecutar los playbooks con Ansible y revisar salida / errores.                               |
+| Inventario  | `~/prueba-tecnica/ansible/` (credenciales de **cambio** ya cargadas).                        |
+| Playbook(s) | Código tuyo en `playbooks/participante/`: tareas idempotentes que apliquen la corrección.    |
+| Ejecución   | `lab-ansible <playbook.yml>` desde el servidor Linux (inventario provisto).                  |
 | Validación  | Confirmar en tu solución que la alerta bajó; no alcanza con “haberlo corrido” sin verificar. |
 
 
-> **💡 Tip**  
-> Si el primer intento no alcanza, podés iterar el playbook y volver a ejecutar. Documentá qué cambiaste entre intentos.
+> **💡 Tip:** Si el primer intento no alcanza, podés iterar el playbook y volver a ejecutar. 
+> Documentá qué cambiaste entre intentos.
 
-### Reglas de la Parte 3
+### Condiciones
 
-
-| Permitido                                                                 | No permitido                                        |
-| ------------------------------------------------------------------------- | --------------------------------------------------- |
-| SSH **solo lectura** para diagnóstico                                     | Cambios manuales en Cisco por SSH                   |
-| Consultar Zabbix (API / UI)                                               | Modificar configuración de Zabbix sin necesidad     |
-| Escribir, ejecutar y ajustar playbooks Ansible con el inventario provisto | Copiar playbooks o comandos sin entender su impacto |
-| Pedir confirmación antes de cambios con impacto                           | Exponer tokens o credenciales en logs/commits       |
-
-
-### Entregables de la Parte 3
-
-- **Explicación verbal o escrita breve:** qué pasó, qué revisaste, por qué esa causa y qué hace cada playbook relevante.
-- **Playbook(s) Ansible** que escribiste y cómo los ejecutaste con el inventario provisto.
-- **Evidencia de recuperación:** captura o descripción de la alerta/página **después** de ejecutar el playbook y validar que el problema se resolvió.
+- Realizar cambios SSH manuales en Cisco **no** está permitido.
+- Escribir, ejecutar y ajustar playbooks Ansible con el inventario provisto.
 
 ### Al finalizar la Parte 3
 
-> Contanos el **resumen del incidente** y mostranos que la alerta **bajó o se recuperó** en tu solución.
+> **Avisá al evaluador cuando termines la Parte 3 (finalización de la prueba)**.
+> **Mostrarle al evaluador cómo acceder a la página web** (URL, puerto y, si aplica, comando para levantarla).
+> **Mostrarle al evaluador el/los playbook(s) Ansible** que escribiste y cómo los ejecutaste con `lab-ansible`.
+> El evaluador **restaurará el entorno**, volverá a activar el incidente y revisará que la Parte 1 y 2 detecten el problema para validar que fueron exitosas.
+> El evaluador **ejecutará el/los playbook(s) Ansible** que escribiste para validar que la Parte 3 remedió el problema y fue exitosa.
 
 ---
 
@@ -241,7 +246,7 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 | Desarrollo de la solución   | Integración con la API (token, consultas), 3 hosts, estado y problemas, solución accesible |
 | Linux / Docker / Ansible    | Levantar la app, logs, playbook funcional sin cambios SSH manuales                         |
 | Monitoreo / troubleshooting | Interpretar alertas, cruzar con SSH, remediar y verificar                                  |
-| Comunicación                | Avisar al terminar cada parte, bloqueos y preguntas a tiempo                               |
+| Comunicación                | Consultar el evaluador para cualquier duda o bloqueo                                       |
 
 
 ### No penalizamos por
@@ -256,14 +261,15 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 ## Checklist rápido
 
 - [ ] Parte 1: página con estado de 3 equipos vía API.
-- [ ] Avisar cuando termine la Parte 1.
+- [ ] Opcional: avisar al evaluador cuando termine la Parte 1.
 - [ ] Parte 2: conteo y detalle de problemas activos.
-- [ ] Avisar cuando termine la Parte 2.
+- [ ] Opcional: avisar al evaluador cuando termine la Parte 2.
 - [ ] Parte 3: diagnóstico + explicación + Ansible + verificación.
-- [ ] Avisar cuando termine la Parte 3.
+- [ ] Avisar al evaluador cuando termine la Parte 3 (finalización de la prueba) para que realice la verificación completa de la solución.
 
 ---
 
-**Duración orientativa:** la prueba está pensada en **3 bloques** con pausas de revisión entre ellos. Si te trabás más de unos minutos sin avanzar, **avisá** — es parte de la evaluación.
+**Duración orientativa:** la prueba está pensada en **3 partes** que podés encadenar **a tu ritmo**.
+**Avisá al evaluador solo al terminar la Parte 3**, salvo que quieras consultarlo antes o te trabés más de unos minutos sin avanzar.
 
 ¡Éxitos!

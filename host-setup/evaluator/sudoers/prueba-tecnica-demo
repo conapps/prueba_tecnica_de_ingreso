@@ -1,0 +1,3 @@
+# Usuario demo (participante): incidente Parte 3 y Ansible con credenciales en /opt
+demo ALL=(root) NOPASSWD: /opt/prueba-tecnica-eval/bin/disparar-incidente
+demo ALL=(root) NOPASSWD: /opt/prueba-tecnica-eval/bin/ansible-participante

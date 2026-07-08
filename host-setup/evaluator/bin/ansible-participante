@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Ejecuta Ansible del participante con credenciales root-only (sin exponerlas en ~/prueba-tecnica).
+set -euo pipefail
+
+CREDS="/opt/prueba-tecnica-eval/cisco-credentials.env"
+PRUEBA_DEMO_HOME="/home/demo"
+PRUEBA_DEMO_USER="demo"
+ANSIBLE_DIR="${PRUEBA_DEMO_HOME}/prueba-tecnica/ansible"
+
+if [[ ! -r "${CREDS}" ]]; then
+  echo "Credenciales Ansible no disponibles. Contactá al evaluador." >&2
+  exit 1
+fi
+
+set -a
+# shellcheck source=/dev/null
+source "${CREDS}"
+set +a
+
+: "${ANSIBLE_CISCO_USER:?}"
+: "${ANSIBLE_CISCO_PASSWORD:?}"
+: "${ANSIBLE_CISCO_ENABLE:?}"
+
+PYVER="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+PY_PATH="${PRUEBA_DEMO_HOME}/.local/lib/python${PYVER}/site-packages"
+SYS_PATH="/usr/local/lib/python${PYVER}/dist-packages"
+
+run_ansible() {
+  runuser -u "${PRUEBA_DEMO_USER}" -- \
+    env ANSIBLE_CISCO_USER="${ANSIBLE_CISCO_USER}" \
+        ANSIBLE_CISCO_PASSWORD="${ANSIBLE_CISCO_PASSWORD}" \
+        ANSIBLE_CISCO_ENABLE="${ANSIBLE_CISCO_ENABLE}" \
+        HOME="${PRUEBA_DEMO_HOME}" \
+        PYTHONPATH="${PY_PATH}:${SYS_PATH}:${PYTHONPATH:-}" \
+    "$@"
+}
+
+if [[ "${1:-}" == "--" ]]; then
+  shift
+  cd "${ANSIBLE_DIR}"
+  run_ansible ansible "$@"
+  exit $?
+fi
+
+if [[ $# -lt 1 ]]; then
+  echo "Uso: ansible-participante <playbook.yml> [args de ansible-playbook]" >&2
+  echo "     ansible-participante -- <comando ansible ad-hoc>" >&2
+  exit 1
+fi
+
+PLAYBOOK="$1"
+shift
+cd "${ANSIBLE_DIR}"
+run_ansible ansible-playbook "playbooks/participante/${PLAYBOOK}" "$@"
