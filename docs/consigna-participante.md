@@ -12,10 +12,10 @@
 Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts** con nombres fijos:
 
 | Host name en Zabbix | Rol | Tipo |
-| --- | --- | --- | --- |
-| `**RTR-Prod-Gateway1`** | Router | Cisco IOS |
-| `**SW-Prod-Core1**` | Switch core | Cisco IOS |
-| `**SW-Prod-Edge1**` | Switch edge | Cisco IOS |
+| --- | --- | --- |
+| `RTR-Prod-Gateway1` | Router | Cisco IOS |
+| `SW-Prod-Core1` | Switch core | Cisco IOS |
+| `SW-Prod-Edge1` | Switch edge | Cisco IOS |
 
 **Diagrama del ambiente:**
 
@@ -27,7 +27,7 @@ Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts*
                         [SW-Prod-Edge1] ←→ [RTR-Prod-Gateway1] ←→ [SW-Prod-Core1]
 ```
 
-Tu tarea es construir una **página web simple** que consuma la API de Zabbix con el **token** que te entregamos y muestre información operativa de `**RTR-Prod-Gateway1`**, `**SW-Prod-Core1**` y `**SW-Prod-Edge1**` únicamente.
+Tu tarea es construir una **página web simple** que consuma la API de Zabbix con el **token** que te entregamos y muestre información operativa de `RTR-Prod-Gateway1`, `SW-Prod-Core1` y `SW-Prod-Edge1` únicamente.
 
 ---
 
@@ -55,18 +55,20 @@ Al comenzar la prueba recibirás credenciales y datos de acceso. Guardalos de fo
 ### Zabbix
 
 
-| URL                                          | Usuario | Contraseña   | API Token                   |
-| -------------------------------------------- | ------- | ------------ | --------------------------- |
+| URL                                         | Usuario | Contraseña   | API Token                   |
+| ------------------------------------------- | ------- | ------------ | --------------------------- |
 | `https://zabbixX.conatel-lab.conatel.cloud` | `demo`  | `Zabbix123!` | Te lo entregamos al iniciar |
 
 
 ### Equipos Cisco
 
-| Host Zabbix | IP | Usuario SSH | Contraseña SSH | SNMPv2 |
-| --- | --- | --- | --- | --- |
-| `RTR-Prod-Gateway1` | `10.0.10.10` | `demo` | `Demo123!` | `snmp-demo` |
-| `SW-Prod-Core1` | `10.0.10.11` | `demo` | `Demo123!` | `snmp-demo` |
-| `SW-Prod-Edge1` | `10.0.10.12` | `demo` | `Demo123!` | `snmp-demo` |
+
+| Host Zabbix         | IP           | Usuario SSH | Contraseña SSH | SNMPv2      |
+| ------------------- | ------------ | ----------- | -------------- | ----------- |
+| `RTR-Prod-Gateway1` | `10.0.0.80` | `demo`      | `Demo123!`     | `snmp-demo` |
+| `SW-Prod-Core1`     | `10.0.0.81` | `demo`      | `Demo123!`     | `snmp-demo` |
+| `SW-Prod-Edge1`     | `10.0.0.82` | `demo`      | `Demo123!`     | `snmp-demo` |
+
 
 **Regla:** El acceso SSH es **únicamente para diagnóstico**. **No** debés aplicar cambios manuales por SSH en los equipos.
 
