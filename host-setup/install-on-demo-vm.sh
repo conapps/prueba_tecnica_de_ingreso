@@ -159,7 +159,7 @@ sudo chgrp ubuntu /opt/prueba-tecnica-eval
 sudo chmod 710 /opt/prueba-tecnica-eval
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/bin
 sudo chmod 750 /opt/prueba-tecnica-eval/bin
-sudo chmod 700 /opt/prueba-tecnica-eval/bin/disparar-incidente /opt/prueba-tecnica-eval/bin/ansible-participante
+sudo chmod 700 /opt/prueba-tecnica-eval/bin/disparar-incidente /opt/prueba-tecnica-eval/bin/ansible-participante /opt/prueba-tecnica-eval/bin/restaurar-incidente-run
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/bin/lab-check /opt/prueba-tecnica-eval/bin/lab-reset /opt/prueba-tecnica-eval/bin/restaurar-incidente
 sudo chmod 750 /opt/prueba-tecnica-eval/bin/lab-check /opt/prueba-tecnica-eval/bin/lab-reset /opt/prueba-tecnica-eval/bin/restaurar-incidente
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/incident.conf /opt/prueba-tecnica-eval/cisco-credentials.env
@@ -192,8 +192,10 @@ fi
 
 sudo rm -f /etc/sudoers.d/prueba-tecnica-participante 2>/dev/null || true
 sudo cp /opt/prueba-tecnica-eval/sudoers/prueba-tecnica-demo /etc/sudoers.d/prueba-tecnica-demo
-sudo chmod 440 /etc/sudoers.d/prueba-tecnica-demo
+sudo cp /opt/prueba-tecnica-eval/sudoers/prueba-tecnica-evaluator /etc/sudoers.d/prueba-tecnica-evaluator
+sudo chmod 440 /etc/sudoers.d/prueba-tecnica-demo /etc/sudoers.d/prueba-tecnica-evaluator
 sudo visudo -cf /etc/sudoers.d/prueba-tecnica-demo >/dev/null
+sudo visudo -cf /etc/sudoers.d/prueba-tecnica-evaluator >/dev/null
 REMOTE
 ok
 

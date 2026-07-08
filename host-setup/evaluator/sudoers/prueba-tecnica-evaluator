@@ -1,0 +1,2 @@
+# Usuario ubuntu (evaluador): rollback incidente Parte 3 sin escribir sudo a mano
+ubuntu ALL=(root) NOPASSWD: /opt/prueba-tecnica-eval/bin/restaurar-incidente-run
