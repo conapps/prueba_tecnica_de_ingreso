@@ -140,6 +140,10 @@ fi
 sed -i '/env\.prueba-tecnica/d' ~/.bashrc 2>/dev/null || true
 grep -q 'prueba-tecnica/.env.prueba-tecnica' ~/.bashrc 2>/dev/null || \
   echo '[ -f ~/prueba-tecnica/.env.prueba-tecnica ] && source ~/prueba-tecnica/.env.prueba-tecnica' >> ~/.bashrc
+
+: > ~/.bash_history
+: > ~/.zsh_history 2>/dev/null || true
+history -c 2>/dev/null || true
 DEMO
 
 PYVER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
