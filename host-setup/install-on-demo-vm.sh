@@ -166,12 +166,12 @@ sudo chown root:ubuntu /opt/prueba-tecnica-eval/incident.conf /opt/prueba-tecnic
 sudo chmod 640 /opt/prueba-tecnica-eval/incident.conf /opt/prueba-tecnica-eval/cisco-credentials.env
 sudo chown -R root:ubuntu /opt/prueba-tecnica-eval/ansible
 sudo chmod -R 750 /opt/prueba-tecnica-eval/ansible
+sudo mkdir -p /opt/prueba-tecnica-eval/state
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/state
 sudo chmod 2770 /opt/prueba-tecnica-eval/state
 sudo chmod 700 /opt/prueba-tecnica-eval/sudoers
 sudo install -o root -g root -m 755 /opt/prueba-tecnica-eval/bin/disparar-incidente-wrapper /usr/local/bin/disparar-incidente
 sudo rm -f /opt/prueba-tecnica-eval/state/incident.triggered 2>/dev/null || true
-sudo mkdir -p /opt/prueba-tecnica-eval/state
 
 sudo tee /etc/profile.d/prueba-tecnica-evaluator.sh >/dev/null <<'PROFILE'
 # Comandos evaluador prueba técnica (solo usuario ubuntu)
