@@ -34,9 +34,10 @@ Comandos disponibles para el evaluador:
 
 Rutas en ${HOST}:
 
-  /opt/prueba-tecnica-eval/              incidente, credenciales Ansible (sin acceso demo)
-  /opt/prueba-tecnica-eval/incident.conf falla simulada (Parte 3)
-  /opt/prueba-tecnica-eval/bin/          lab-check, lab-reset, restaurar-incidente, disparar-incidente
+  /opt/prueba-tecnica-eval/                       → directorio evaluador
+  /opt/prueba-tecnica-eval/incident.conf          → falla simulada (Parte 3, editable)
+  /opt/prueba-tecnica-eval/cisco-credentials.env  → credenciales Ansible Cisco (editable)
+  /opt/prueba-tecnica-eval/bin/                   → lab-check, lab-reset, restaurar-incidente
 
 ══════════════════════════════════════════════════════════════
   PARTICIPANTE (servidor)
@@ -44,7 +45,7 @@ Rutas en ${HOST}:
 
 Conexión:
 
-  ssh -i demo-access demo@${HOST}
+  ssh -i ~/.ssh/demo-access demo@${HOST}
 
 Comandos disponibles para el participante:
 
@@ -61,10 +62,10 @@ Comandos disponibles para el participante:
 
 Rutas en ${HOST}:
 
-  /home/demo/prueba-tecnica/             directorio de trabajo
-  /home/demo/prueba-tecnica/ansible/
-  /home/demo/prueba-tecnica/ansible/playbooks/participante/
-  /home/demo/prueba-tecnica/.env.prueba-tecnica   variables ZABBIX_*
+  /home/demo/prueba-tecnica/                                → directorio de trabajo
+  /home/demo/prueba-tecnica/ansible/                        → directorio Ansible
+  /home/demo/prueba-tecnica/ansible/playbooks/participante/ → directorio playbooks participante
+  /home/demo/prueba-tecnica/.env.prueba-tecnica             → variables ZABBIX_*
 
 ══════════════════════════════════════════════════════════════
   ENTREGA AL PARTICIPANTE

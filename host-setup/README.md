@@ -20,6 +20,7 @@ bash host-setup/install-on-demo-vm.sh demoN.dominio
 ```
 
 Requisito: la VM debe tener el usuario Linux **`demo`** (despliegue del servicio demo con up/update).
+El install instala **`python3-paramiko`** si falta (Ansible `network_cli` hacia Cisco; el SSH manual no lo reemplaza).
 
 ### Clave SSH del participante
 
@@ -46,7 +47,7 @@ Referencia evaluador: [`docs/plantilla-evaluador.md`](../docs/plantilla-evaluado
 1. Copiar [`evaluator/cisco-credentials.example`](evaluator/cisco-credentials.example) → [`evaluator/cisco-credentials.env`](evaluator/cisco-credentials.env) (gitignored).
 2. Completar `ANSIBLE_CISCO_USER`, `ANSIBLE_CISCO_PASSWORD` y `ANSIBLE_CISCO_ENABLE`.
 3. Usuario, contraseña y enable **no** van en `group_vars` para que el participante no las vea.
-4. El install las sube a `/opt/prueba-tecnica-eval/cisco-credentials.env` (root, `600`).
+4. El install las sube a `/opt/prueba-tecnica-eval/cisco-credentials.env` (`640`, grupo `ubuntu`).
 5. El participante ejecuta playbooks con **`lab-ansible`** (usuario `demo`).
 
 ### Import Zabbix (hosts)
@@ -76,7 +77,7 @@ Preparación general del entorno: [`docs/guia-evaluador.md`](../docs/guia-evalua
 | `/home/demo/prueba-tecnica/scripts/` | Participante | `lab-ansible`, aliases SSH (`aliases.sh`) |
 | `/home/demo/prueba-tecnica/.env.prueba-tecnica` | Participante | API Zabbix (`ZABBIX_*`) |
 | `/opt/prueba-tecnica-eval/cisco-credentials.env` | Sistema | Ansible cambio Cisco (`lab-ansible`, incidente) |
-| `/opt/prueba-tecnica-eval/` | Sistema | Falla/rollback (710 root:ubuntu — **sin acceso demo**) |
+| `/opt/prueba-tecnica-eval/` | Evaluador (`ubuntu`) | Falla/rollback (750 root:ubuntu — **sin acceso demo**) |
 | `/usr/local/bin/disparar-incidente` | Participante | `disparar-incidente` (Parte 3, sin sudo) |
 | `/opt/prueba-tecnica-eval/bin/lab-check`, `lab-reset`, `restaurar-incidente` | Evaluador (ubuntu) | Solo grupo ubuntu; no en PATH de demo |
 | `host-setup/scripts/participant/` | Repo local | `lab-ansible`, `aliases.sh` → se despliegan a `/home/demo/...` |

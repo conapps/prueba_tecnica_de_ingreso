@@ -87,7 +87,8 @@ if command -v rsync >/dev/null 2>&1; then
   sudo rsync -a --delete "${STAGING}/ansible/" "${DEMO_HOME}/prueba-tecnica/ansible/"
   sudo rsync -a --delete "${STAGING}/scripts/" "${DEMO_HOME}/prueba-tecnica/scripts/"
 else
-  sudo rm -rf "${DEMO_HOME}/prueba-tecnica/scripts"/*
+  sudo rm -rf "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts"
+  sudo mkdir -p "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts"
   sudo cp -a "${STAGING}/ansible/." "${DEMO_HOME}/prueba-tecnica/ansible/"
   sudo cp -a "${STAGING}/scripts/." "${DEMO_HOME}/prueba-tecnica/scripts/"
 fi
@@ -113,8 +114,6 @@ PATH_LINE='export PATH="$HOME/prueba-tecnica/scripts:$PATH"'
 for rc in .bashrc .zshrc .zprofile; do
   grep -q 'prueba-tecnica/scripts' "${HOME}/${rc}" 2>/dev/null || echo "${PATH_LINE}" >> "${HOME}/${rc}"
 done
-
-rm -rf ~/prueba-tecnica/ansible/group_vars ~/prueba-tecnica/ansible/host_vars 2>/dev/null || true
 
 ENV_FILE="${HOME}/prueba-tecnica/.env.prueba-tecnica"
 if [[ -f ~/.env.prueba-tecnica && ! -f "${ENV_FILE}" ]]; then
@@ -156,14 +155,16 @@ sudo rm -f /usr/local/bin/lab-check /usr/local/bin/lab-reset /usr/local/bin/rest
 
 sudo chown -R root:root /opt/prueba-tecnica-eval
 sudo chgrp ubuntu /opt/prueba-tecnica-eval
-sudo chmod 710 /opt/prueba-tecnica-eval
+sudo chmod 750 /opt/prueba-tecnica-eval
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/bin
 sudo chmod 750 /opt/prueba-tecnica-eval/bin
 sudo chmod 700 /opt/prueba-tecnica-eval/bin/disparar-incidente /opt/prueba-tecnica-eval/bin/ansible-participante /opt/prueba-tecnica-eval/bin/restaurar-incidente-run
 sudo chown root:ubuntu /opt/prueba-tecnica-eval/bin/lab-check /opt/prueba-tecnica-eval/bin/lab-reset /opt/prueba-tecnica-eval/bin/restaurar-incidente
 sudo chmod 750 /opt/prueba-tecnica-eval/bin/lab-check /opt/prueba-tecnica-eval/bin/lab-reset /opt/prueba-tecnica-eval/bin/restaurar-incidente
-sudo chown root:ubuntu /opt/prueba-tecnica-eval/incident.conf /opt/prueba-tecnica-eval/cisco-credentials.env
-sudo chmod 640 /opt/prueba-tecnica-eval/incident.conf /opt/prueba-tecnica-eval/cisco-credentials.env
+sudo chown root:ubuntu /opt/prueba-tecnica-eval/incident.conf
+sudo chmod 640 /opt/prueba-tecnica-eval/incident.conf
+sudo chown root:ubuntu /opt/prueba-tecnica-eval/cisco-credentials.env
+sudo chmod 640 /opt/prueba-tecnica-eval/cisco-credentials.env
 sudo chown -R root:ubuntu /opt/prueba-tecnica-eval/ansible
 sudo chmod -R 750 /opt/prueba-tecnica-eval/ansible
 sudo mkdir -p /opt/prueba-tecnica-eval/state
@@ -198,6 +199,14 @@ sudo visudo -cf /etc/sudoers.d/prueba-tecnica-demo >/dev/null
 sudo visudo -cf /etc/sudoers.d/prueba-tecnica-evaluator >/dev/null
 REMOTE
 ok
+
+step "Paramiko (Ansible)"
+if "${SSH[@]}" "$REMOTE_ADMIN" 'python3 -c "import paramiko"' 2>/dev/null; then
+  ok
+else
+  "${SSH[@]}" "$REMOTE_ADMIN" 'sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-paramiko'
+  ok
+fi
 
 step "Ansible (cisco)"
 "${SSH[@]}" "$REMOTE_ADMIN" 'sudo rm -rf /home/demo/.ansible/pc 2>/dev/null || true'
