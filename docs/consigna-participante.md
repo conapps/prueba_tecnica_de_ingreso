@@ -24,11 +24,11 @@ Tenemos un entorno pequeño monitoreado con **Zabbix**, compuesto por **3 hosts*
 **Diagrama del ambiente (referencia):**
 
 ```
-                            [ Zabbix ] ←→ [ VM Linux ] → [ Solución web ]
-                                |              |
-                            +---------------------+---------------------+
-                            |                                           |
-                        [Switch edge] ←→ [Router] ←→ [Switch core]
+      [ Zabbix ] ←→ [ VM Linux ] → [ Solución web ]
+          |              |
+      +---------------------+---------------------+
+      |                                           |
+  [Switch edge] ←→ [Router] ←→ [Switch core]
 ```
 
 Tu tarea es construir una **página web simple** que consuma la API de Zabbix y muestre información operativa de **esos 3 hosts únicamente** (mismos nombres que en Zabbix). Las credenciales de la API están en el servidor (ver abajo).
