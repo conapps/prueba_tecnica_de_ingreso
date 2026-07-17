@@ -40,6 +40,7 @@ ssh -i ~/.ssh/demo-access ...@<host>
 whoami   # → ...
 ```
 
+3. Usuario proporcionado **sin `sudo`**.
 
 ---
 

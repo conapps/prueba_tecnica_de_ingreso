@@ -26,6 +26,6 @@ La prueba se desarrolla en **3 bloques**:
 
 - **CML**: 3 equipos Cisco; baseline = SNMP mal configurado solo en Zabbix en un switch.
 - **Red**: Cisco CML (router + 2 switches, SSH y SNMP).
-- **Servidor Linux (OCI)**: usuario SSH **`demo`** (participante), Ansible, Docker opcional; conectividad a Zabbix y Cisco. Evaluador: **`ubuntu`**.
+- **Servidor Linux (OCI)**: usuario SSH **`demo`** (participante, sin sudo), trabajo en `~/prueba-tecnica/`, Ansible vía `lab-ansible`, app con **Docker**; conectividad a Zabbix y Cisco. Evaluador: **`ubuntu`**.
 
 Para detalle de infraestructura, credenciales, criterios de evaluación y procedimientos del evaluador, ver [guía del evaluador](docs/guia-evaluador.md).

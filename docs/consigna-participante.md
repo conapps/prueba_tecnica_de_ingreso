@@ -41,17 +41,29 @@ Al comenzar la prueba recibirás credenciales y datos de acceso (hosts, IPs, usu
 
 Guardalos de forma segura y **no los compartas** ni los subas a repositorios públicos.
 
+## Reglas generales
+
+- **⚠️ Leé esto antes de empezar (Partes 1–3)**  
+- Todo el trabajo de la prueba vive en `~/prueba-tecnica/`, por lo que tu app, playbooks y configs deben estar ahí.  
+- El usuario Linux proporcionado **no tiene** `sudo`, ya que no hace falta, la consigna está pensada para que no necesites instalar software de sistema; usá lo ya disponible.
+- La app se levanta con **Docker**, por lo que no podés usar otros contenedores o orquestadores.
+- La remediación Cisco se hace con `lab-ansible`, por lo que no podés usar `ansible-playbook` a mano.
+- Conectividad hacia Zabbix y los equipos Cisco.
+
 ### Servidor Linux
 
 Datos del servidor:
 
-- **Directorio de trabajo:** `~/prueba-tecnica/` — inventario Ansible, variables Zabbix, playbooks y tu aplicación. Creá ahí todo lo que necesites para la prueba.
-- En el servidor tenés disponibles, entre otras cosas: **Ansible** y herramientas comunes (incluido **Docker** preinstalado por comodidad).
-  - **Ansible** — automatización con permisos de cambio (vía `lab-ansible`).
-  - **Inventario** — ya configurado (hosts, grupos y credenciales de acceso) para que **Ansible** se conecte a los equipos Cisco reales con permisos para **remediar**. No tenés que armar el inventario desde cero: usalo tal como viene y concentrate el esfuerzo en los **playbooks**. Esos permisos de cambio se usan **solo desde Ansible**, no desde una sesión SSH manual en Cisco.
-  - **Cómo levantar tu app** — **stack libre**: podés usar Docker, Podman, Kubernetes, un proceso en el host, etc.
-  - Docker viene instalado para ahorrar tiempo.
-- Conectividad hacia Zabbix y los equipos Cisco.
+- **Directorio de trabajo:** `~/prueba-tecnica/`
+  - Ahí se encuentra `.env.prueba-tecnica` (variables de entorno para Zabbix), directorio de Ansible (inventario, playbooks) y el lugar para tu aplicación.
+  - Creá y deja todo lo que necesites para la prueba **dentro de ese directorio**.
+- **Usuario sin sudo:** entras con el usuario proporcionado. No tenés privilegios de administrador. Lo que necesitás ya está instalado (Docker, Ansible, etc.).
+- En el servidor tenés disponibles, entre otras cosas: 
+  - **Ansible** y **Docker** preinstalados por comodidad (no hace falta instalarlos).
+  - **Docker** — forma requerida de correr tu solución web (Docker / Docker Compose).
+  - **Ansible** — automatización con permisos de cambio en equipos **solo** vía el wrapper `lab-ansible` (ver abajo).
+  - **Inventario** — ya configurado en `~/prueba-tecnica/ansible/` (hosts, grupos). No lo armes desde cero: concentrate en los **playbooks**. Esos permisos de cambio se usan **solo desde Ansible**, no desde una sesión SSH manual en Cisco.
+  - Conectividad hacia Zabbix y los equipos Cisco.
 
 ### Zabbix
 
@@ -76,20 +88,12 @@ Datos de los equipos Cisco:
 > **Regla:** El acceso SSH es **únicamente para diagnóstico**. 
 > **No** debés aplicar cambios manuales por SSH en los equipos.
 
----
+Se te proporcionan los siguientes alias de SSH para conectarte a los equipos:
+- `ssh-rtr` para el router.
+- `ssh-core` para el switch core.
+- `ssh-edge` para el switch edge.
 
-## Reglas generales
-
-- La solución debe **correr en el servidor Linux** provisto (proceso directo, contenedor, orquestador, etc.).
-- Desplegá tu solución y archivos propios dentro de **`~/prueba-tecnica/`** (salvo lo ya provisto).
-- Debe ser **accesible por navegador** desde el servidor de la prueba.
-- **No** hace falta autenticación en la página web ni diseño visual avanzado.
-- **No** hardcodees credenciales en el código: usá variables de entorno o archivos de config fuera del repositorio.
-- Consultá Zabbix **solo vía API** con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica` (no hace falta entrar ni modificar Zabbix por la interfaz web).
-- La solución debe mostrar los **3 hosts** de la prueba (nombres en la entrega al iniciar).
-- Ante la Parte 3: **diagnóstico** por SSH lectura; **corrección** solo con **Ansible**.
-
-**Stack libre:** elegí la tecnología que te resulte más cómoda.
+> No hacer `ssh ssh-rtr` sino usar el alias directamente.
 
 ---
 
@@ -121,8 +125,11 @@ La página debe mostrar, como mínimo:
 
 ### Condiciones
 
-- Consumir la API con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica`.
-- La app debe estar **corriendo y accesible** desde el servidor de la prueba.
+- La solución debe **correr en el servidor Linux** provisto, dentro del directorio `~/prueba-tecnica/`, con **Docker** (o Docker Compose) y **debe ser accesible por navegador** desde el servidor de la prueba (publicá un puerto del contenedor).
+- **No** hace falta autenticación en la página web ni diseño visual avanzado.
+- **No** hardcodees credenciales en el código: usá variables de entorno o archivos de config fuera del repositorio (por ejemplo `env_file` apuntando a `~/prueba-tecnica/.env.prueba-tecnica`).
+- Consultá Zabbix **solo vía API** con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica` (no hace falta entrar ni modificar Zabbix por la interfaz web).
+- La solución debe mostrar los **3 hosts** de la prueba (nombres en la entrega al iniciar).
 - Podés refrescar manualmente o automáticamente; no es obligatorio un frontend complejo.
 
 ---
@@ -160,9 +167,9 @@ La página debe mostrar, como mínimo:
 ### Ejemplo de detalle
 
 
-| Equipo      | Alerta           | Severidad | Desde |
-| ----------- | ---------------- | --------- | ----- |
-| Switch edge | SNMP unavailable | High      | 10:32 |
+| Equipo      | Alerta           | Severidad | Desde | Estado |
+| ----------- | ---------------- | --------- | ----- | ------ |
+| Switch edge | SNMP unavailable | High      | 10:32 | Activo |
 
 
 ### Condiciones
@@ -189,36 +196,52 @@ Ejecutá en el servidor Linux:
 disparar-incidente
 ```
 
-- **No** requiere `sudo` (el sistema eleva permisos por detrás).
 - Solo podés ejecutarlo **una vez** durante tu prueba.
 - La salida del comando es solo un mensaje de confirmación; **no** muestra detalles del cambio aplicado.
-- Esperá unos minutos a que Zabbix refleje el problema y revisá tu solución.
-
-Después investigá y remediá **por tu cuenta** con Ansible hasta considerar resuelto el incidente.
+- Esperá unos minutos mientras que Zabbix detecte el problema y revisá tu solución.
+- Tu solución debe mostrar el problema activo en la parte 2.
+- Después investigá y remediá **por tu cuenta** con Ansible hasta considerar resuelto el incidente (ver **Qué esperamos que hagas vos**).
 
 ### Qué esperamos que hagas vos
 
 1. **Detectar** el problema en tu solución.
 2. **Identificar** el equipo afectado y la alerta relevante.
-3. **Podés conectarte por SSH** al equipo o equipos afectados (usuario de solo lectura de la plantilla; en el servidor tenés aliases `ssh-rtr`, `ssh-core`, `ssh-edge`) y revisar el estado.
-4. **Explicar** la causa probable y la solución propuesta (podés usar IA y documentación; validá antes de ejecutar).
-5. **Escribir uno o varios playbooks Ansible** en `~/prueba-tecnica/ansible/playbooks/participante/` que corrijan el problema.
-6. **Ejecutarlos** con `lab-ansible <tu-playbook.yml>` (usa el inventario provisto).
-7. **Validar** que el incidente quedó resuelto: alerta en recuperación o cerrada en tu solución, estado coherente en tu solución y, si aplica, contraste con diagnóstico por SSH de solo lectura.
+3. **Diagnosticar** el problema en el equipo(s) afectado(s) (ten en cuenta que el usuario proporcionado es de **solo lectura** ya que la idea es que no hagas cambios manuales por SSH en los equipos sino que uses Ansible para remediar el problema).
+  - Como se te comentó anteriormente, en el servidor tenés aliases `ssh-rtr`, `ssh-core`, `ssh-edge` para conectarte a los equipos via SSH (solo lectura) para revisar y diagnosticar el problema.
+4. **Explicar** la causa probable y la solución propuesta.
+5. **Corregir** el problema con Ansible. Para ello, debes **escribir uno o varios playbooks Ansible** en `~/prueba-tecnica/ansible/playbooks/participante/` que corrijan el problema.
+  - Se recomienda que el nombre del archivo sea descriptivo del problema y la solución.
+  - Recuerda que el playbook debe apoyarse en el inventario provisto en `~/prueba-tecnica/ansible/inventory/hosts.yml` para remediar el problema.
+6. **Ejecutar** la solución con `lab-ansible <nombre-del-archivo.yml>` (solo el nombre; el wrapper busca en esa carpeta y usa el inventario provisto).
+7. **Validar** que el incidente quedó resuelto: alerta en recuperación o cerrada en tu solución, estado coherente en tu solución y, si aplica, contraste con diagnóstico por SSH.
+
+#### Ejemplo de cómo correr Ansible (`lab-ansible`)
+
+1. Escribí el playbook en:
+  ```bash
+   ~/prueba-tecnica/ansible/playbooks/participante/
+
+   # Ejemplo: 
+   ~/prueba-tecnica/ansible/playbooks/participante/solucionar-problema.yml
+  ```
+2. Ejecutalo pasando **solo el nombre del archivo** (no la ruta completa):
+  ```bash
+   lab-ansible solucionar-problema.yml
+  ```
+3. `lab-ansible` usa el inventario provisto y las credenciales de cambio. **No** uses `ansible-playbook` directo ni inventarios propios.
 
 ### Remediación con Ansible (detalle)
 
 
-| Paso        | Qué esperamos                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------- |
-| Inventario  | `~/prueba-tecnica/ansible/` (credenciales de **cambio** ya cargadas).                        |
-| Playbook(s) | Código tuyo en `playbooks/participante/`: tareas idempotentes que apliquen la corrección.    |
-| Ejecución   | `lab-ansible <playbook.yml>` desde el servidor Linux (inventario provisto).                  |
-| Validación  | Confirmar en tu solución que la alerta bajó; no alcanza con “haberlo corrido” sin verificar. |
+| Paso       | Qué esperamos                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| Ubicación  | Playbook(s) en `~/prueba-tecnica/ansible/playbooks/participante/` (ej. `solucionar-problema.yml`).      |
+| Inventario | `~/prueba-tecnica/ansible/inventory/hosts.yml` (ya provisto; credenciales de **cambio** las inyecta `lab-ansible`).        |
+| Ejecución  | `lab-ansible solucionar-problema.yml` — **solo el nombre del archivo**, no la ruta completa ni `ansible-playbook`. |
+| Validación | Confirmar en tu solución que la alerta bajó; no alcanza con “haberlo corrido” sin verificar.            |
 
 
-> **💡 Tip:** Si el primer intento no alcanza, podés iterar el playbook y volver a ejecutar. 
-> Documentá qué cambiaste entre intentos.
+> **💡 Tip:** Si el primer intento no alcanza, podés iterar el playbook y volver a ejecutar. Podes **documentar** qué cambiaste entre intentos.
 
 ### Condiciones
 
@@ -227,7 +250,7 @@ Después investigá y remediá **por tu cuenta** con Ansible hasta considerar re
 
 ### Al finalizar la Parte 3
 
-> **Avisá al evaluador cuando termines la Parte 3 (finalización de la prueba)**.
+> **Avisá al evaluador cuando termines la Parte 3 (finalización de la prueba)** para que realice la verificación completa de la solución.
 > **Mostrarle al evaluador cómo acceder a la página web** (URL, puerto y, si aplica, comando para levantarla).
 > **Mostrarle al evaluador el/los playbook(s) Ansible** que escribiste y cómo los ejecutaste con `lab-ansible`.
 > El evaluador **restaurará el entorno**, volverá a activar el incidente y revisará que la Parte 1 y 2 detecten el problema para validar que fueron exitosas.
@@ -240,13 +263,15 @@ Después investigá y remediá **por tu cuenta** con Ansible hasta considerar re
 No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 
 
-| Área                        | Qué miramos                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| Uso de IA                   | Contexto claro, validación, iteración, explicación de lo hecho                             |
-| Desarrollo de la solución   | Integración con la API (token, consultas), 3 hosts, estado y problemas, solución accesible |
-| Linux / Docker / Ansible    | Levantar la app, logs, playbook funcional sin cambios SSH manuales                         |
-| Monitoreo / troubleshooting | Interpretar alertas, cruzar con SSH, remediar y verificar                                  |
-| Comunicación                | Consultar el evaluador para cualquier duda o bloqueo                                       |
+| Área                        | Qué miramos                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| Uso de IA                   | Contexto claro, validación, iteración, explicación de lo hecho                                    |
+| Desarrollo de la solución   | Integración con la API (token, consultas), 3 hosts, estado y problemas, solución accesible        |
+| Linux / Docker / Ansible    | App en Docker bajo `~/prueba-tecnica/`, logs, playbook con `lab-ansible` sin cambios SSH manuales |
+| Monitoreo / troubleshooting | Interpretar alertas, cruzar con SSH, remediar y verificar                                         |
+| Comunicación                | Consultar el evaluador para cualquier duda o bloqueo                                              |
+
+
 
 
 ### No penalizamos por
@@ -254,7 +279,7 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 - Diseño visual básico.
 - No conocer los endpoints de la API de memoria.
 - No recordar comandos Cisco exactos.
-- Elegir un stack simple pero **funcional**.
+- Una solución Docker simple pero **funcional**.
 
 ---
 
@@ -264,7 +289,7 @@ No es una rúbrica numérica para vos, pero ayuda a saber qué valoramos:
 - [ ] Opcional: avisar al evaluador cuando termine la Parte 1.
 - [ ] Parte 2: conteo y detalle de problemas activos.
 - [ ] Opcional: avisar al evaluador cuando termine la Parte 2.
-- [ ] Parte 3: diagnóstico + explicación + Ansible + verificación.
+- [ ] Parte 3: diagnóstico + playbook en `ansible/playbooks/participante/` + `lab-ansible` + verificación.
 - [ ] Avisar al evaluador cuando termine la Parte 3 (finalización de la prueba) para que realice la verificación completa de la solución.
 
 ---

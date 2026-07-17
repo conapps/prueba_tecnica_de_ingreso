@@ -59,7 +59,7 @@ Deben existir **3 hosts** visibles para la prueba (mismos nombres que en la [pla
 | Componente   | Requisito                                           |
 | ------------ | --------------------------------------------------- |
 | Acceso       | Credenciales SSH separadas para evaluador y participante |
-| Software     | Ansible; Docker preinstalado (opcional — stack libre) |
+| Software     | Ansible; **Docker** (requerido para la app del participante) |
 | Conectividad | Zabbix, equipos Cisco (SSH), salida HTTP/HTTPS      |
 | Ansible      | Inventario/vars con permisos de **cambio** en Cisco |
 | SSH lectura  | Credenciales separadas solo diagnóstico             |
@@ -100,7 +100,8 @@ Página web que consulte la API de Zabbix y muestre estado y alertas de 3 equipo
 
 ### Condiciones
 
-- Corre en servidor Linux (stack libre: Docker, Podman, proceso en host, etc.).
+- Corre en servidor Linux con **Docker**, bajo `~/prueba-tecnica/`.
+- Usuario `demo` **sin sudo**.
 - Accesible por navegador; al cierre de la prueba el participante informa URL/puerto.
 - Sin auth en la página; sin diseño elaborado.
 
@@ -288,7 +289,7 @@ La prueba es **DevOps (IA / Infraestructura)**: la solución de las Partes 1 y 2
 
 ### Infraestructura y automatización (20%)
 
-- Linux, runtime libre, logs; Ansible en Cisco; **sin** cambios manuales SSH.
+- Linux, **Docker** bajo `~/prueba-tecnica/`, logs; Ansible vía `lab-ansible`; **sin** cambios manuales SSH.
 
 ### Desarrollo de la solución (15%)
 
@@ -348,7 +349,7 @@ Instalación en la VM e import de hosts: [host-setup/README.md](../host-setup/RE
 - [ ] Clave participante: `host-setup/keys/demo-access` (misma en todo el lab)
 - [ ] En la VM (ubuntu): `lab-check` OK; participante puede SSH como `demo`.
 - [ ] Verificar baseline: alerta en Zabbix vs equipo real operativo por SSH/SNMP.
-- [ ] VM Linux: Ansible, conectividad, rutas/firewall OK (Docker opcional para el participante).
+- [ ] VM Linux: Ansible, Docker usable por `demo`, conectividad, rutas/firewall OK.
 - [ ] Inventario Ansible (lectura vs cambio) probado.
 - [ ] Incidente self-service: `disparar-incidente` (participante) probado; `restaurar-incidente` (evaluador) OK.
 - [ ] Consigna enviada: [consigna-participante.md](consigna-participante.md).
