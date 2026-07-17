@@ -39,16 +39,19 @@ step "Usuario demo"
 ok
 
 step "Participante"
-"${SSH[@]}" "$REMOTE_ADMIN" "rm -rf ${STAGING} && mkdir -p ${STAGING}/ansible/playbooks/participante ${STAGING}/scripts"
+"${SSH[@]}" "$REMOTE_ADMIN" "rm -rf ${STAGING} && mkdir -p ${STAGING}/ansible/playbooks/participante ${STAGING}/scripts ${STAGING}/app"
 if command -v rsync >/dev/null 2>&1 && "${SSH[@]}" "$REMOTE_ADMIN" 'command -v rsync >/dev/null 2>&1'; then
   "${RSYNC[@]}" "${SRC}/ansible/" "${REMOTE_ADMIN}:${STAGING}/ansible/" >/dev/null
   "${RSYNC[@]}" "${PARTICIPANT_SCRIPTS}/" "${REMOTE_ADMIN}:${STAGING}/scripts/" >/dev/null
+  "${RSYNC[@]}" "${SRC}/app/" "${REMOTE_ADMIN}:${STAGING}/app/" >/dev/null
 else
-  "${SSH[@]}" "$REMOTE_ADMIN" "rm -rf ${STAGING} && mkdir -p ${STAGING}/ansible/playbooks/participante ${STAGING}/scripts"
+  "${SSH[@]}" "$REMOTE_ADMIN" "rm -rf ${STAGING} && mkdir -p ${STAGING}/ansible/playbooks/participante ${STAGING}/scripts ${STAGING}/app"
   tar -C "${SRC}" -czf - ansible | "${SSH[@]}" "$REMOTE_ADMIN" "tar -xzf - -C ${STAGING}"
   tar -C "${PARTICIPANT_SCRIPTS}" -czf - . | "${SSH[@]}" "$REMOTE_ADMIN" "tar -xzf - -C ${STAGING}/scripts"
+  tar -C "${SRC}/app" -czf - . | "${SSH[@]}" "$REMOTE_ADMIN" "tar -xzf - -C ${STAGING}/app"
 fi
 "${SCP[@]}" "${SRC}/ssh/config.d/prueba-tecnica" "${REMOTE_ADMIN}:${STAGING}/prueba-tecnica-ssh-config"
+"${SCP[@]}" "${SRC}/workdir/README.md" "${REMOTE_ADMIN}:${STAGING}/prueba-tecnica-README.md"
 "${SCP[@]}" "${SRC}/python/sitecustomize.py" "${REMOTE_ADMIN}:/tmp/sitecustomize-prueba-tecnica.py"
 "${SCP[@]}" "${DEPLOY_SCRIPTS}/lab-check" "${DEPLOY_SCRIPTS}/lab-reset" "${REMOTE_ADMIN}:/tmp/"
 ok
@@ -81,20 +84,23 @@ step "Configuración VM"
 "${SSH[@]}" "$REMOTE_ADMIN" env DEMO_USER="${DEMO_USER}" DEMO_HOME="${DEMO_HOME}" STAGING="${STAGING}" bash -s >/dev/null <<'REMOTE'
 set -euo pipefail
 
-sudo mkdir -p "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts" "${DEMO_HOME}/.ssh/config.d"
-sudo find "${DEMO_HOME}/prueba-tecnica" -mindepth 1 -maxdepth 1 ! -name ansible ! -name scripts -exec rm -rf {} +
+sudo mkdir -p "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts" "${DEMO_HOME}/prueba-tecnica/app" "${DEMO_HOME}/.ssh/config.d"
+sudo find "${DEMO_HOME}/prueba-tecnica" -mindepth 1 -maxdepth 1 ! -name ansible ! -name scripts ! -name app -exec rm -rf {} +
 if command -v rsync >/dev/null 2>&1; then
   sudo rsync -a --delete "${STAGING}/ansible/" "${DEMO_HOME}/prueba-tecnica/ansible/"
   sudo rsync -a --delete "${STAGING}/scripts/" "${DEMO_HOME}/prueba-tecnica/scripts/"
+  sudo rsync -a --delete "${STAGING}/app/" "${DEMO_HOME}/prueba-tecnica/app/"
 else
-  sudo rm -rf "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts"
-  sudo mkdir -p "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts"
+  sudo rm -rf "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts" "${DEMO_HOME}/prueba-tecnica/app"
+  sudo mkdir -p "${DEMO_HOME}/prueba-tecnica/ansible" "${DEMO_HOME}/prueba-tecnica/scripts" "${DEMO_HOME}/prueba-tecnica/app"
   sudo cp -a "${STAGING}/ansible/." "${DEMO_HOME}/prueba-tecnica/ansible/"
   sudo cp -a "${STAGING}/scripts/." "${DEMO_HOME}/prueba-tecnica/scripts/"
+  sudo cp -a "${STAGING}/app/." "${DEMO_HOME}/prueba-tecnica/app/"
 fi
 sudo find "${DEMO_HOME}/prueba-tecnica/scripts" -mindepth 1 -maxdepth 1 \
   ! -name 'lab-ansible' ! -name 'aliases.sh' -exec rm -f {} +
 sudo install -o "${DEMO_USER}" -g "${DEMO_USER}" -m 600 "${STAGING}/prueba-tecnica-ssh-config" "${DEMO_HOME}/.ssh/config.d/prueba-tecnica"
+sudo install -o "${DEMO_USER}" -g "${DEMO_USER}" -m 644 "${STAGING}/prueba-tecnica-README.md" "${DEMO_HOME}/prueba-tecnica/README.md"
 sudo rm -rf "${STAGING}"
 
 if [[ -f /tmp/env.prueba-tecnica ]]; then
@@ -177,6 +183,12 @@ sudo chmod 2770 /opt/prueba-tecnica-eval/state
 sudo chmod 700 /opt/prueba-tecnica-eval/sudoers
 sudo install -o root -g root -m 755 /opt/prueba-tecnica-eval/bin/disparar-incidente-wrapper /usr/local/bin/disparar-incidente
 sudo rm -f /opt/prueba-tecnica-eval/state/incident.triggered 2>/dev/null || true
+
+# Limpieza Docker (solución del participante anterior)
+if command -v docker >/dev/null 2>&1; then
+  sudo docker ps -aq 2>/dev/null | xargs -r sudo docker rm -f >/dev/null 2>&1 || true
+  sudo docker system prune -af --volumes >/dev/null 2>&1 || true
+fi
 
 sudo tee /etc/profile.d/prueba-tecnica-evaluator.sh >/dev/null <<'PROFILE'
 # Comandos evaluador prueba técnica (solo usuario ubuntu)

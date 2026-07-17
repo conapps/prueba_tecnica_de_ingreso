@@ -34,10 +34,12 @@ Comandos disponibles para el evaluador:
 
 Rutas en ${HOST}:
 
-  /opt/prueba-tecnica-eval/                       → directorio evaluador
-  /opt/prueba-tecnica-eval/incident.conf          → falla simulada (Parte 3, editable)
-  /opt/prueba-tecnica-eval/cisco-credentials.env  → credenciales Ansible Cisco (editable)
-  /opt/prueba-tecnica-eval/bin/                   → lab-check, lab-reset, restaurar-incidente
+  /opt/prueba-tecnica-eval/
+  ├── incident.conf            # falla simulada (Parte 3, editable)
+  ├── cisco-credentials.env    # credenciales Ansible Cisco (editable)
+  ├── bin/                     # lab-check, lab-reset, disparar-incidente, restaurar-incidente
+  ├── ansible/                 # playbooks incidente / rollback
+  └── state/                   # lock incidente, ansible.log
 
 ══════════════════════════════════════════════════════════════
   PARTICIPANTE (servidor)
@@ -62,10 +64,19 @@ Comandos disponibles para el participante:
 
 Rutas en ${HOST}:
 
-  /home/demo/prueba-tecnica/                                → directorio de trabajo
-  /home/demo/prueba-tecnica/ansible/                        → directorio Ansible
-  /home/demo/prueba-tecnica/ansible/playbooks/participante/ → directorio playbooks participante
-  /home/demo/prueba-tecnica/.env.prueba-tecnica             → variables ZABBIX_*
+  ~/prueba-tecnica/
+  ├── README.md                # mapa del directorio de trabajo
+  ├── app/                     # solución web (Docker)
+  ├── ansible/                 # inventario + playbooks (Parte 3)
+  │   ├── ansible.cfg
+  │   ├── inventory/
+  │   │   ├── group_vars/
+  │   │   ├── host_vars/
+  │   │   └── hosts.yml
+  │   └── playbooks/
+  │       └── participante/    # playbooks del participante (.yml) (Parte 3)
+  ├── scripts/                 # lab-ansible, aliases — no modificar
+  └── .env.prueba-tecnica      # variables ZABBIX_*
 
 ══════════════════════════════════════════════════════════════
   ENTREGA AL PARTICIPANTE

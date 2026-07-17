@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Quitar playbooks del participante anterior — solo evaluador (ubuntu).
+# Quitar playbooks y restos Docker del participante anterior — solo evaluador (ubuntu).
 set -euo pipefail
 
 if [[ "$(id -un)" != ubuntu ]]; then
@@ -18,4 +18,33 @@ else
   echo "Eliminados ${#files[@]} playbook(s) en playbooks/participante/."
 fi
 
-echo "Revisá servicios del participante en /home/demo (docker, podman, procesos, etc.)"
+if command -v docker >/dev/null 2>&1; then
+  n_ctr="$(sudo docker ps -aq 2>/dev/null | wc -l | tr -d ' ')"
+  if [[ "${n_ctr}" -gt 0 ]]; then
+    sudo docker ps -aq | xargs -r sudo docker rm -f >/dev/null
+    echo "Eliminados ${n_ctr} contenedor(es) Docker."
+  else
+    echo "No hay contenedores Docker."
+  fi
+  sudo docker system prune -af --volumes >/dev/null
+  echo "Docker: imágenes, volúmenes, redes y build cache no usados eliminados."
+else
+  echo "Docker no está instalado; nada que limpiar."
+fi
+
+APP_DIR="/home/demo/prueba-tecnica/app"
+if [[ -d "${APP_DIR}" ]]; then
+  shopt -s nullglob dotglob
+  app_entries=("${APP_DIR}"/*)
+  app_removed=0
+  for entry in "${app_entries[@]}"; do
+    [[ "$(basename "${entry}")" == "README.md" ]] && continue
+    sudo rm -rf "${entry}"
+    app_removed=$((app_removed + 1))
+  done
+  if [[ "${app_removed}" -gt 0 ]]; then
+    echo "Eliminados ${app_removed} elemento(s) en app/ (se conserva README.md)."
+  else
+    echo "No hay archivos del participante en app/."
+  fi
+fi

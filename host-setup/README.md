@@ -72,7 +72,8 @@ Preparación general del entorno: [`docs/guia-evaluador.md`](../docs/guia-evalua
 
 | Ruta | Quién | Uso |
 | --- | --- | --- |
-| `/home/demo/prueba-tecnica/` | Participante (`demo`) | Directorio de trabajo (app, ansible, .env) |
+| `/home/demo/prueba-tecnica/` | Participante (`demo`) | Directorio de trabajo (app, ansible, .env); `README.md` con el mapa |
+| `/home/demo/prueba-tecnica/app/` | Participante | Solución web Docker (Partes 1–2); `README.md` solo de la app |
 | `/home/demo/prueba-tecnica/ansible/` | Participante | Inventario + `playbooks/participante/` |
 | `/home/demo/prueba-tecnica/scripts/` | Participante | `lab-ansible`, aliases SSH (`aliases.sh`) |
 | `/home/demo/prueba-tecnica/.env.prueba-tecnica` | Participante | API Zabbix (`ZABBIX_*`) |

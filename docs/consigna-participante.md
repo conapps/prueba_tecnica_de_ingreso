@@ -55,8 +55,22 @@ Guardalos de forma segura y **no los compartas** ni los subas a repositorios pú
 Datos del servidor:
 
 - **Directorio de trabajo:** `~/prueba-tecnica/`
-  - Ahí se encuentra `.env.prueba-tecnica` (variables de entorno para Zabbix), directorio de Ansible (inventario, playbooks) y el lugar para tu aplicación.
-  - Creá y deja todo lo que necesites para la prueba **dentro de ese directorio**.
+  ```bash
+  ~/prueba-tecnica/
+  ├── README.md               # mapa del directorio de trabajo
+  ├── app/                    # tu solución web (Docker)
+  ├── ansible/                # inventario + playbooks (Parte 3)
+  │   ├── ansible.cfg
+  │   ├── inventory/
+  │   │   ├── group_vars/
+  │   │   ├── host_vars/
+  │   │   └── hosts.yml
+  │   └── playbooks/
+  │       └── participante/   # tus playbooks (.yml) (Parte 3)
+  ├── scripts/                # lab-ansible, aliases — no modifiques estos archivos
+  └── .env.prueba-tecnica     # variables ZABBIX_*
+  ```
+  - Creá y deja todo lo que necesites para la prueba **dentro de este directorio**.
 - **Usuario sin sudo:** entras con el usuario proporcionado. No tenés privilegios de administrador. Lo que necesitás ya está instalado (Docker, Ansible, etc.).
 - En el servidor tenés disponibles, entre otras cosas: 
   - **Ansible** y **Docker** preinstalados por comodidad (no hace falta instalarlos).
@@ -125,7 +139,7 @@ La página debe mostrar, como mínimo:
 
 ### Condiciones
 
-- La solución debe **correr en el servidor Linux** provisto, dentro del directorio `~/prueba-tecnica/`, con **Docker** (o Docker Compose) y **debe ser accesible por navegador** desde el servidor de la prueba (publicá un puerto del contenedor).
+- La solución debe **correr en el servidor Linux** provisto, dentro del directorio `~/prueba-tecnica/app/`, con **Docker** (o Docker Compose) y **debe ser accesible por navegador** desde el servidor de la prueba (publicá un puerto del contenedor).
 - **No** hace falta autenticación en la página web ni diseño visual avanzado.
 - **No** hardcodees credenciales en el código: usá variables de entorno o archivos de config fuera del repositorio (por ejemplo `env_file` apuntando a `~/prueba-tecnica/.env.prueba-tecnica`).
 - Consultá Zabbix **solo vía API** con las variables `ZABBIX_`* de `~/prueba-tecnica/.env.prueba-tecnica` (no hace falta entrar ni modificar Zabbix por la interfaz web).
